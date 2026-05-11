@@ -3,14 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Mock Quiz — จรรยาบรรณ CFP2</title>
+<title>จรรยาบรรณ CFP — เกมช่วยจำ</title>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700;800&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#FFFFEB;--blue:#0549FE;--green:#33DF93;--yellow:rgb(237,255,40);
-  --pink:#FF53FF;--black:#1A1A1A;--gold:#E4D64D;--muted:#888;
-  --white:#fff;--border:#E0DFDF;--shadow:0 2px 12px rgba(0,0,0,.08);
-  --shadow-lg:0 8px 32px rgba(0,0,0,.18)
+:root {
+  --bg:     #FFFFEB;
+  --blue:   #0549FE;
+  --green:  #33DF93;
+  --yellow: #EDFF28;
+  --pink:   #FF53FF;
+  --black:  #1A1A1A;
+  --gold:   #E4D64D;
+  --muted:  #888;
+  --white:  #fff;
+  --border: #E0DFDF;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.18);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);font-family:'Prompt',sans-serif;color:var(--black);min-height:100vh;overflow-x:hidden}
@@ -19,1235 +27,1481 @@ body{background:var(--bg);font-family:'Prompt',sans-serif;color:var(--black);min
 
 /* ===== HOME ===== */
 #home-screen{background:var(--bg);padding-bottom:100px}
+
+/* Full-width content column, max 420px, 18px side padding */
 .home-col{width:100%;max-width:420px;padding:0 18px}
-.home-top{padding-top:13px}
-.badge-pill{background:var(--blue);color:#fff;font-size:.72rem;font-weight:700;letter-spacing:.6px;padding:5px 14px;border-radius:20px;display:inline-flex;align-items:center;margin-bottom:13px}
-.home-title{font-size:2.6rem;font-weight:800;line-height:1;color:var(--black);margin-bottom:6px}
-.home-sub{font-size:.8rem;color:var(--muted);font-family:'Sarabun',sans-serif;margin-bottom:20px}
 
-.quiz-set-card{
-  background:var(--blue);border-radius:17px;padding:22px 22px 20px;
-  margin-bottom:12px;cursor:pointer;transition:transform .14s;position:relative;overflow:hidden
+/* Top section */
+.home-top{padding-top:13px;padding-bottom:0}
+
+/* Badge pill */
+.badge-row{display:flex;align-items:center;gap:0;margin-bottom:13px}
+.badge-pill{
+  background:var(--blue);color:var(--white);
+  font-size:.72rem;font-weight:700;letter-spacing:.6px;
+  padding:5px 14px;border-radius:20px;
+  display:inline-flex;align-items:center;gap:10px;
 }
-.quiz-set-card:active{transform:scale(.97)}
-.qsc-label{font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:4px}
-.qsc-meta{font-size:.72rem;color:rgba(255,255,255,.6);font-family:'Sarabun',sans-serif}
-.qsc-arrow{position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:1.4rem;color:rgba(255,255,255,.5)}
-.qsc-badge{display:inline-block;background:var(--yellow);color:var(--black);font-size:.65rem;font-weight:700;padding:3px 9px;border-radius:20px;margin-top:8px}
+/* Stars OUTSIDE badge, inline after */
+.badge-stars{
+  display:inline-flex;gap:2px;margin-left:4px
+}
+.star-icon{
+  /* Rounded star shape using SVG path from file */
+  width:16px;height:16px;display:block
+}
 
-/* ===== QUIZ SCREEN ===== */
-#quiz-screen{background:var(--bg);justify-content:flex-start}
-.quiz-bar{
+.home-title{
+  font-size:2.85rem;font-weight:800;line-height:1;
+  letter-spacing:0px;color:var(--black);margin-bottom:13px
+}
+
+/* ===== CARD STACK =====
+  Based on SVG proportions (scaled 402px→384px content):
+  CFP1: height 230px (265 * 384/442 ≈ 230)
+  CFP2: height 109px (125 * 384/442 ≈ 108)
+  Gap between: ~10px (485-474=11 * scale)
+*/
+.cards-stack{
+  position:relative;
+  display:flex;flex-direction:column;gap:9px;
+  margin-bottom:10px;
+  overflow:visible;
+  height:348px
+}
+
+/* Shared card base */
+.main-card{
+  width:100%;
+  background:var(--blue);
+  border-radius:17px; /* 19px in SVG scaled */
+  position:relative;
+  overflow:hidden;
+  cursor:pointer;transition:transform .14s
+}
+.main-card:active{transform:scale(.97)}
+.card-cfp1{
+  height:230px; /* CFP1 taller */
+  cursor:default
+}
+.card-cfp2{
+  height:109px; /* CFP2 shorter */
+}
+
+/* Card inner text layout */
+/* CFP1: text centered vertically (justify-content:center) */
+.card-inner{
+  position:absolute;
+  top:0;left:0;right:0;bottom:0;
+  padding:20px 140px 20px 24px; /* right padding leaves room for character */
+  display:flex;flex-direction:column;justify-content:center;
+  z-index:2
+}
+/* CFP2: text centered vertically, right-aligned, left padding for character */
+.card-inner-right{
+  position:absolute;
+  top:0;left:0;right:0;bottom:0;
+  padding:14px 22px 14px 130px; /* left padding leaves room for character */
+  display:flex;flex-direction:column;justify-content:center;
+  align-items:flex-end;
+  z-index:2
+}
+.card-label{font-size:2.31rem;font-weight:800;color:#fff;line-height:1;margin-bottom:1px;letter-spacing:2px}
+.card-sub{font-size:.82rem;color:rgba(255,255,255,.58)}
+
+/* ===== CHARACTERS =====
+  finger-1.svg viewBox 215x260, green shape inside: x=48..181(w=133), y=22..259(h=237)
+  finger-2.svg viewBox 209x208, green shape inside: x=25..189(w=164), y=32..208(h=176)
+
+  To fill the shape to the correct pixel size, we render the SVG LARGER
+  than the shape target and offset it so whitespace falls outside the container.
+
+  Finger-1: render at 188x226px
+    shape occupies x:[42..158], y:[19..225] within the rendered SVG
+    position right:-30px so right edge of shape = card right
+    position bottom:-1px so bottom of shape = card bottom
+    gap at card top ≈ 23px ✓
+
+  Finger-2: render at 182x181px
+    shape occupies x:[22..165], y:[28..181] within the rendered SVG
+    SVG bottom flush with CFP2 card bottom
+    SVG top at stack position 167px → shape top at 195px (35px into CFP1 body)
+    position left:-2px (slight left overhang of shape whitespace)
+*/
+
+/* Finger-1: bottom:118px = CFP1 bottom (stack 348px - CFP1 bot 230px = 118px)
+   right:-30px = shape right edge flush with card right (svg has 30px whitespace on right) */
+.char-cfp1{
+  position:absolute;
+  right:-11px;
+  bottom:117px;
+  width:188px;
+  height:226px;
+  z-index:10;
+  pointer-events:none
+}
+.char-cfp1 svg{width:188px;height:226px;display:block}
+
+/* Finger-2: rendered 182x181
+   In .cards-stack: CFP2 top=239px, CFP2 bot=348px
+   SVG height=181 → svg top = 348-181 = 167px from stack top
+   Shape top in stack = 167+28 = 195px → bleeds 44px above CFP2 (239-195=44px)
+   That is 35px into CFP1 body (230-195=35px = 15% of CFP1 height)
+   left:-2px slight overhang of SVG whitespace
+*/
+.char-cfp2-wrap{
+  position:absolute;
+  top:167px;
+  left:-2px;
+  width:182px;
+  height:181px;
+  z-index:10;
+  pointer-events:none
+}
+.char-cfp2-wrap svg{width:182px;height:181px;display:block}
+
+/* ===== SMALL CARDS =====
+  SVG: pink x=41..236, green x=248..443, both y=621..816
+  Width each: 195px in SVG → gap=12px in SVG
+  Height: 195px → scaled ≈ 170px
+*/
+.small-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin-bottom:0
+}
+.small-card{
+  border-radius:17px;
+  padding:16px 16px 18px;
+  min-height:100px;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  cursor:pointer;transition:transform .14s
+}
+.small-card:active{transform:scale(.97)}
+.sc-pink{background:var(--pink)}
+.sc-green{background:var(--green)}
+.small-label{font-size:.86rem;font-weight:700;color:#fff;line-height:1.4}
+
+/* ===== BOTTOM NAV =====
+  SVG: nav circles at cy=894.5, r=33 → diameter=66
+  Scaled: r=29 → diameter=57px ≈ 56px
+  Nav sep line at y=838 → acts as top border
+  3 circles centered: cx=168.5/241.5/314.5
+  Spacing between centers: 73px → scaled ≈ 63px
+*/
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--bg);
+  display:flex;flex-direction:column;
+  align-items:center;
+  padding:0 0 24px;
+  z-index:1000
+}
+.bottom-nav-line{
+  width:100%;max-width:420px;
+  height:0;background:transparent;
+  margin-bottom:12px
+}
+.bottom-nav-btns{
+  display:flex;justify-content:center;
+  align-items:center;gap:14px
+}
+.nav-btn{
+  width:56px;height:56px;border-radius:50%;border:none;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:transform .13s;flex-shrink:0;
+  padding:0
+}
+.nav-btn:active{transform:scale(.9)}
+.nb-blue{background:var(--blue)}
+.nb-pink{background:var(--pink)}
+.nb-green{background:var(--green)}
+
+/* ===== LEVEL SELECT ===== */
+#level-screen{background:var(--bg)}
+.lvl-header{
+  width:100%;background:var(--blue);
+  display:flex;align-items:center;gap:12px;
+  padding:18px 18px 20px
+}
+.back-btn{
+  width:36px;height:36px;border-radius:9px;
+  border:1px solid rgba(255,255,255,.25);background:transparent;
+  color:#fff;font-size:1.1rem;cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center
+}
+.back-btn:active{transform:scale(.9)}
+.lvl-htitle{font-size:.95rem;font-weight:700;color:#fff}
+.lvl-hsub{font-size:.7rem;color:rgba(255,255,255,.5);font-family:'Sarabun',sans-serif}
+.lvl-list{width:100%;max-width:420px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.lvl-item{
+  background:#fff;border:1px solid #e0ded6;
+  border-radius:15px;padding:14px 16px;
+  display:flex;align-items:center;gap:12px;
+  cursor:pointer;transition:transform .14s;box-shadow:var(--shadow)
+}
+.lvl-item:active{transform:scale(.98)}
+.lvl-num{
+  width:36px;height:36px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.85rem;font-weight:800;flex-shrink:0
+}
+.lvl-name{font-size:.88rem;font-weight:700;margin-bottom:2px}
+.lvl-meta{font-size:.7rem;color:var(--muted);font-family:'Sarabun',sans-serif}
+.lvl-badge{font-size:.66rem;font-weight:700;padding:3px 9px;border-radius:20px;flex-shrink:0}
+.badge-free{background:rgba(51,223,147,.22);color:#006640}
+
+/* ===== GAME ===== */
+#game-screen{background:var(--bg);justify-content:flex-start}
+.game-bar{
   width:100%;background:var(--blue);
   display:flex;align-items:center;gap:10px;
   padding:11px 14px;position:sticky;top:0;z-index:100
 }
-.back-btn{width:36px;height:36px;border-radius:9px;border:1px solid rgba(255,255,255,.25);background:transparent;color:#fff;font-size:1.1rem;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
-.back-btn:active{transform:scale(.9)}
-.qb-info{flex:1}
-.qb-title{font-size:.84rem;font-weight:700;color:#fff;line-height:1.2}
-.qb-sub{font-size:.67rem;color:rgba(255,255,255,.5);font-family:'Sarabun',sans-serif}
-.q-counter{background:var(--yellow);color:var(--black);border-radius:9px;padding:5px 11px;text-align:center;min-width:50px}
-.q-counter-val{font-size:1.1rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
-.q-counter-lbl{font-size:.52rem;opacity:.55;letter-spacing:.8px}
+.gb-info{flex:1}
+.gb-title{font-size:.84rem;font-weight:700;color:#fff;line-height:1.2}
+.gb-sub{font-size:.67rem;color:rgba(255,255,255,.5);font-family:'Sarabun',sans-serif}
+.timer-box{
+  background:var(--yellow);color:var(--black);
+  border-radius:9px;padding:5px 11px;text-align:center;min-width:50px
+}
+.timer-val{font-size:1.1rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.timer-lbl{font-size:.52rem;opacity:.55;letter-spacing:.8px}
+.timer-box.urgent{background:#e63946;color:#fff;animation:pulse .5s infinite alternate}
+@keyframes pulse{from{opacity:1}to{opacity:.6}}
 
-/* Progress bar */
-.progress-wrap{width:100%;background:rgba(255,255,255,.15);height:4px}
-.progress-bar{height:4px;background:var(--yellow);transition:width .3s ease}
+.game-body{width:100%;max-width:420px;padding:13px 14px;display:flex;flex-direction:column;gap:11px;flex:1}
+.desc-banner{
+  background:#fff;border:1px solid #e0ded6;
+  border-radius:13px;padding:13px 15px;
+  font-family:'Sarabun',sans-serif;font-size:.82rem;line-height:1.85;
+  box-shadow:var(--shadow)
+}
+.cols-header{display:grid;gap:7px}
+.col-head{
+  border-radius:11px;padding:9px 6px;text-align:center;
+  font-size:.74rem;font-weight:700;line-height:1.35;
+  min-height:44px;display:flex;align-items:center;justify-content:center
+}
+.ch0{background:var(--blue);color:#fff}
+.ch1{background:var(--green);color:var(--black)}
+.ch2{background:var(--pink);color:#fff}
+.drop-zones{display:grid;gap:7px}
+.drop-zone{
+  border-radius:13px;padding:7px;min-height:72px;
+  display:flex;flex-direction:column;gap:5px;
+  transition:all .18s;position:relative
+}
+.dz0{background:rgba(5,73,254,.05);border:2px dashed rgba(5,73,254,.22)}
+.dz1{background:rgba(51,223,147,.06);border:2px dashed rgba(51,223,147,.35)}
+.dz2{background:rgba(255,83,255,.05);border:2px dashed rgba(255,83,255,.28)}
+.dz0.drag-over{background:rgba(5,73,254,.11);border-color:var(--blue)}
+.dz1.drag-over{background:rgba(51,223,147,.13);border-color:#22c07c}
+.dz2.drag-over{background:rgba(255,83,255,.11);border-color:var(--pink)}
+.dz-hint{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:.66rem;color:var(--muted);opacity:.55;
+  pointer-events:none;white-space:nowrap;font-family:'Sarabun',sans-serif
+}
+.wb-label{
+  font-size:.66rem;color:var(--muted);letter-spacing:.5px;
+  text-transform:uppercase;font-family:'Sarabun',sans-serif;text-align:center
+}
+.word-bank{
+  background:#fff;border:1px solid #e0ded6;
+  border-radius:15px;padding:13px;
+  display:flex;flex-wrap:wrap;gap:7px;justify-content:center;
+  min-height:58px;box-shadow:var(--shadow)
+}
+.word-card{
+  background:#f5f5ee;border:2px solid #e0ded6;
+  border-radius:9px;padding:7px 12px;
+  font-size:.8rem;font-weight:600;
+  cursor:grab;user-select:none;touch-action:none;
+  transition:all .14s;text-align:center;line-height:1.4
+}
+.word-card:active,.word-card.dragging{
+  cursor:grabbing;transform:scale(1.07) rotate(1.5deg);
+  box-shadow:var(--shadow-lg);border-color:var(--blue);background:#fff
+}
+.word-card.placed-0{border-color:rgba(5,73,254,.55);background:rgba(5,73,254,.07)}
+.word-card.placed-1{border-color:rgba(51,223,147,.65);background:rgba(51,223,147,.09)}
+.word-card.placed-2{border-color:rgba(255,83,255,.55);background:rgba(255,83,255,.07)}
+.submit-wrap{padding-bottom:22px}
+.submit-btn{
+  width:100%;padding:14px;background:var(--blue);color:#fff;
+  border:none;border-radius:13px;font-family:'Prompt',sans-serif;
+  font-size:.95rem;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 16px rgba(5,73,254,.3);transition:transform .15s
+}
+.submit-btn:active{transform:scale(.98)}
+.drag-ghost{
+  position:fixed;pointer-events:none;z-index:9999;
+  background:#fff;border:2px solid var(--blue);border-radius:9px;
+  padding:7px 12px;font-family:'Prompt',sans-serif;
+  font-size:.8rem;font-weight:600;color:var(--black);
+  box-shadow:var(--shadow-lg);
+  transform:translate(-50%,-50%) scale(1.07) rotate(1.5deg);white-space:nowrap
+}
 
-.quiz-body{width:100%;max-width:420px;padding:18px 14px;display:flex;flex-direction:column;gap:14px;flex:1;padding-bottom:100px}
-
-.q-number-badge{
-  display:inline-flex;align-items:center;justify-content:center;
-  width:32px;height:32px;border-radius:10px;
-  background:var(--blue);color:#fff;
-  font-size:.8rem;font-weight:800;flex-shrink:0
-}
-.q-text-wrap{display:flex;gap:10px;align-items:flex-start}
-.q-text{
-  background:#fff;border:1px solid var(--border);
-  border-radius:13px;padding:14px 16px;
-  font-family:'Sarabun',sans-serif;font-size:.9rem;line-height:1.85;
-  box-shadow:var(--shadow);flex:1;white-space:pre-line
-}
-
-.choices-list{display:flex;flex-direction:column;gap:8px}
-.choice-btn{
-  width:100%;background:#fff;border:2px solid var(--border);
-  border-radius:13px;padding:13px 16px;
-  font-family:'Sarabun',sans-serif;font-size:.88rem;
-  text-align:left;cursor:pointer;transition:all .15s;
-  display:flex;align-items:flex-start;gap:10px;line-height:1.6;
-  color:var(--black)
-}
-.choice-btn:active{transform:scale(.98)}
-.choice-btn.selected{
-  border-color:var(--blue);background:rgba(5,73,254,.07);
-}
-.choice-num{
-  flex-shrink:0;width:24px;height:24px;border-radius:7px;
-  background:#f0f0e8;font-size:.72rem;font-weight:700;
-  display:flex;align-items:center;justify-content:center;
-  margin-top:1px;transition:all .15s
-}
-.choice-btn.selected .choice-num{background:var(--blue);color:#fff}
-
-/* Nav buttons */
-.quiz-nav{
-  position:fixed;bottom:0;left:0;right:0;background:var(--bg);
-  display:flex;flex-direction:column;align-items:center;
-  padding:0 0 24px;z-index:1000
-}
-.quiz-nav-line{width:auto;margin:0 18px 12px;height:2px;background:var(--border)}
-.quiz-nav-btns{width:100%;max-width:420px;padding:0 14px;display:flex;gap:8px}
-.btn-prev{
-  flex:0 0 auto;padding:13px 18px;background:#fff;color:var(--black);
-  border:1px solid var(--border);border-radius:13px;
-  font-family:'Prompt',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer
-}
-.btn-next{
-  flex:1;padding:13px;background:var(--blue);color:#fff;
-  border:none;border-radius:13px;
-  font-family:'Prompt',sans-serif;font-size:.93rem;font-weight:700;cursor:pointer;
-  box-shadow:0 4px 16px rgba(5,73,254,.3)
-}
-.btn-submit{
-  flex:1;padding:13px;background:var(--green);color:var(--black);
-  border:none;border-radius:13px;
-  font-family:'Prompt',sans-serif;font-size:.93rem;font-weight:700;cursor:pointer;
-  box-shadow:0 4px 16px rgba(51,223,147,.3)
-}
-.btn-prev:active,.btn-next:active,.btn-submit:active{transform:scale(.98)}
-
-/* ===== RESULT SCREEN ===== */
-#result-screen{background:var(--bg);justify-content:flex-start;overflow-y:auto}
-.result-hdr{width:100%;padding:26px 20px 22px;text-align:center;position:relative}
+/* ===== RESULT ===== */
+#result-screen{background:var(--bg);justify-content:flex-start}
+.result-hdr{width:100%;padding:26px 20px 22px;text-align:center;position:relative;overflow:hidden}
 .result-emoji{font-size:54px;display:block;animation:bounceIn .5s ease;margin-bottom:8px}
 @keyframes bounceIn{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
 .result-heading{font-size:1.55rem;font-weight:800;margin-bottom:4px}
 .result-sublabel{font-size:.78rem;color:rgba(26,26,26,.5);font-family:'Sarabun',sans-serif}
-.result-body{width:100%;max-width:420px;padding:16px 16px 120px;display:flex;flex-direction:column;gap:12px}
-
+.result-body{width:100%;max-width:420px;padding:18px 16px;display:flex;flex-direction:column;gap:12px}
 .score-card{
-  background:#fff;border:1px solid var(--border);border-radius:15px;
+  background:#fff;border:1px solid #e0ded6;border-radius:15px;
   padding:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;box-shadow:var(--shadow)
 }
 .score-stat{text-align:center}
 .score-val{font-size:1.45rem;font-weight:800;line-height:1}
 .score-lbl{font-size:.68rem;color:var(--muted);font-family:'Sarabun',sans-serif;margin-top:3px}
-
-/* Answer review list */
+.review-box{background:#fff;border:1px solid #e0ded6;border-radius:15px;padding:14px;box-shadow:var(--shadow)}
 .review-hd{font-size:.78rem;font-weight:700;opacity:.5;margin-bottom:10px}
-.review-box{background:#fff;border:1px solid var(--border);border-radius:15px;padding:14px;box-shadow:var(--shadow)}
-.rv-item{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 0;border-bottom:1px solid var(--border);
-  cursor:pointer;transition:background .12s;border-radius:8px;padding:10px 6px
-}
-.rv-item:last-child{border-bottom:none}
-.rv-item:active{background:#f5f5ee}
-.rv-num{
-  width:28px;height:28px;border-radius:8px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-  font-size:.75rem;font-weight:800
-}
-.rv-num.ok{background:rgba(51,223,147,.2);color:#006640}
-.rv-num.no{background:rgba(230,57,70,.12);color:#e63946}
-.rv-content{flex:1}
-.rv-qtext{font-size:.76rem;font-family:'Sarabun',sans-serif;color:var(--muted);line-height:1.4;margin-bottom:2px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
-.rv-answer{font-size:.8rem;font-weight:600}
-.rv-answer.ok{color:#006640}
-.rv-answer.no{color:#e63946}
-.rv-tap{font-size:.65rem;color:var(--muted);opacity:.6;font-family:'Sarabun',sans-serif;flex-shrink:0}
+.review-item{display:flex;align-items:flex-start;gap:9px;padding:8px 0;border-bottom:1px solid #e0ded6}
+.review-item:last-child{border-bottom:none}
+.rv-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.dot-ok{background:#22c07c}.dot-no{background:#e63946}
+.rv-word{font-weight:600;flex:1;font-size:.78rem;line-height:1.4}
+.rv-ans{font-family:'Sarabun',sans-serif;font-size:.76rem;text-align:right;min-width:60px}
+.rv-ans.ok{color:#006640;font-weight:600}.rv-ans.no{color:#e63946}
+.result-btns{display:flex;flex-direction:column;gap:9px;padding-bottom:30px}
+.btn-blue{width:100%;padding:13px;background:var(--blue);color:#fff;border:none;border-radius:13px;font-family:'Prompt',sans-serif;font-size:.93rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(5,73,254,.28);transition:transform .15s}
+.btn-outline{width:100%;padding:13px;background:#fff;color:var(--black);border:1px solid #e0ded6;border-radius:13px;font-family:'Prompt',sans-serif;font-size:.93rem;font-weight:600;cursor:pointer}
+.btn-green{width:100%;padding:13px;background:var(--green);color:var(--black);border:none;border-radius:13px;font-family:'Prompt',sans-serif;font-size:.93rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(51,223,147,.3)}
+.btn-blue:active,.btn-outline:active,.btn-green:active{transform:scale(.98)}
 
-.result-btns{display:flex;flex-direction:column;gap:9px}
-.btn-blue{width:100%;padding:13px;background:var(--blue);color:#fff;border:none;border-radius:13px;font-family:'Prompt',sans-serif;font-size:.93rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(5,73,254,.28)}
-.btn-outline{width:100%;padding:13px;background:#fff;color:var(--black);border:1px solid var(--border);border-radius:13px;font-family:'Prompt',sans-serif;font-size:.93rem;font-weight:600;cursor:pointer}
-.btn-blue:active,.btn-outline:active{transform:scale(.98)}
-
-/* Bottom nav */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;padding:0 0 24px;z-index:1000}
-.bottom-nav-line{width:auto;margin:0 18px 12px;height:2px;background:var(--border)}
-.bottom-nav-btns{display:flex;justify-content:center;align-items:center;gap:14px}
-.nav-btn{width:56px;height:56px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .13s;flex-shrink:0;padding:0}
-.nav-btn:active{transform:scale(.9)}
-.nb-blue{background:var(--blue)}.nb-pink{background:var(--pink)}.nb-green{background:var(--green)}
-
-/* MODAL — question detail popup */
+/* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:9000;display:none;align-items:flex-end;justify-content:center}
 .modal-overlay.open{display:flex}
-.modal-sheet{width:100%;max-width:420px;background:#fff;border-radius:20px 20px 0 0;padding:22px 18px 38px;animation:slideUp .3s ease;max-height:85vh;overflow-y:auto}
+.modal-sheet{width:100%;max-width:420px;background:#fff;border-radius:20px 20px 0 0;padding:22px 18px 38px;animation:slideUp .3s ease;max-height:80vh;overflow-y:auto}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal-handle{width:38px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px}
-.modal-q-num{font-size:.72rem;font-weight:700;color:var(--blue);margin-bottom:6px}
-.modal-q-text{font-size:.92rem;font-family:'Sarabun',sans-serif;line-height:1.85;margin-bottom:16px;color:var(--black);white-space:pre-line}
-.modal-choices{display:flex;flex-direction:column;gap:7px;margin-bottom:18px}
-.modal-choice{
-  display:flex;align-items:flex-start;gap:10px;
-  padding:11px 13px;border-radius:11px;border:2px solid var(--border);
-  font-family:'Sarabun',sans-serif;font-size:.85rem;line-height:1.55
-}
-.modal-choice.correct{border-color:var(--green);background:rgba(51,223,147,.1)}
-.modal-choice.wrong{border-color:#e63946;background:rgba(230,57,70,.06)}
-.modal-choice.neutral{border-color:var(--border)}
-.mc-num{flex-shrink:0;width:22px;height:22px;border-radius:6px;background:#f0f0e8;font-size:.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px}
-.modal-choice.correct .mc-num{background:var(--green);color:var(--black)}
-.modal-choice.wrong .mc-num{background:#e63946;color:#fff}
-.modal-close{width:100%;padding:12px;background:var(--blue);color:#fff;border:none;border-radius:11px;font-family:'Prompt',sans-serif;font-weight:600;font-size:.88rem;cursor:pointer}
+.modal-handle{width:38px;height:4px;background:#e0ded6;border-radius:2px;margin:0 auto 18px}
+.modal-title{font-size:.97rem;font-weight:700;margin-bottom:14px}
+.exp-item{padding:11px 0;border-bottom:1px solid #e0ded6;font-family:'Sarabun',sans-serif}
+.exp-item:last-child{border-bottom:none}
+.exp-term{font-weight:700;font-size:.88rem;margin-bottom:4px;font-family:'Prompt',sans-serif}
+.exp-text{font-size:.81rem;color:var(--muted);line-height:1.8}
+.modal-close{width:100%;margin-top:18px;padding:12px;background:var(--blue);color:#fff;border:none;border-radius:11px;font-family:'Prompt',sans-serif;font-weight:600;font-size:.88rem;cursor:pointer}
 
 /* Confetti */
 .confetti-wrap{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9999}
 .confetti-dot{position:absolute;top:-20px;border-radius:2px;animation:cfall linear forwards}
 @keyframes cfall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
+/* ===== CALENDAR SCREEN ===== */
+#calendar-screen{background:var(--bg);justify-content:flex-start;overflow-y:auto}
+.cal-header{
+  width:100%;background:var(--pink);
+  display:flex;align-items:center;gap:12px;
+  padding:18px 18px 20px
+}
+.cal-htitle{font-size:.95rem;font-weight:700;color:#fff}
+.cal-hsub{font-size:.7rem;color:rgba(255,255,255,.6);font-family:"Sarabun",sans-serif}
+.cal-body{width:100%;max-width:420px;padding:20px 18px 120px;display:flex;flex-direction:column;gap:16px}
+
+.countdown-display{
+  background:var(--pink);border-radius:20px;
+  padding:28px 24px;text-align:center;color:#fff
+}
+.countdown-display.empty{
+  background:#fff;border:2px dashed #e0ded6;color:var(--muted)
+}
+.cd-days{font-size:3.5rem;font-weight:800;line-height:1;margin-bottom:4px}
+.cd-label{font-size:.82rem;font-family:"Sarabun",sans-serif;opacity:.85;margin-bottom:8px}
+.cd-hours{font-size:1.1rem;font-weight:700;opacity:.9}
+.cd-empty-text{font-size:.9rem;font-family:"Sarabun",sans-serif}
+
+.cal-section-title{font-size:.78rem;font-weight:700;opacity:.5;letter-spacing:.5px}
+.date-picker-wrap{
+  background:#fff;border:1px solid #e0ded6;
+  border-radius:16px;padding:18px;box-shadow:0 2px 12px rgba(0,0,0,.08)
+}
+.date-picker-label{font-size:.8rem;color:var(--muted);font-family:"Sarabun",sans-serif;margin-bottom:10px}
+.date-input{
+  width:100%;padding:12px 14px;
+  border:2px solid #e0ded6;border-radius:11px;
+  font-family:"Prompt",sans-serif;font-size:.95rem;
+  color:var(--black);background:#fff;outline:none;
+  transition:border-color .15s
+}
+.date-input:focus{border-color:var(--pink)}
+.date-save-btn{
+  width:100%;padding:14px;background:var(--pink);color:#fff;
+  border:none;border-radius:13px;font-family:"Prompt",sans-serif;
+  font-size:.95rem;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 16px rgba(255,83,255,.28);transition:transform .15s;margin-top:10px
+}
+.date-save-btn:active{transform:scale(.98)}
+.date-clear-btn{
+  width:100%;padding:12px;background:#fff;color:var(--muted);
+  border:1px solid #e0ded6;border-radius:13px;
+  font-family:"Prompt",sans-serif;font-size:.88rem;cursor:pointer;margin-top:6px
+}
+
+/* COMING SOON */
+#coming-soon-screen{background:var(--bg);justify-content:flex-start}
+.cs-header{width:100%;background:var(--blue);display:flex;align-items:center;gap:12px;padding:18px 18px 20px}
+.cs-htitle{font-size:.95rem;font-weight:700;color:#fff}
+.cs-body{width:100%;max-width:420px;padding:60px 18px;display:flex;flex-direction:column;align-items:center;gap:20px;text-align:center}
+.cs-icon{font-size:72px;line-height:1;animation:wobble 2s ease infinite}
 @keyframes wobble{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+.cs-title{font-size:1.3rem;font-weight:800;color:var(--black)}
+.cs-sub{font-size:.88rem;color:var(--muted);font-family:'Sarabun',sans-serif;line-height:1.8}
 
-/* Timer */
-.timer-box{background:var(--yellow);color:var(--black);border-radius:9px;padding:5px 11px;text-align:center;min-width:58px}
-.timer-val{font-size:1.1rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:1px}
-.timer-lbl{font-size:.52rem;opacity:.55;letter-spacing:.8px}
-.timer-box.urgent{background:#e63946;color:#fff;animation:tpulse .5s infinite alternate}
-@keyframes tpulse{from{opacity:1}to{opacity:.6}}
-
-/* Check button */
-.check-btn{
-  background:var(--pink);color:#fff;
-  border:none;border-radius:9px;
-  padding:0 14px;height:46px;
-  font-family:'Prompt',sans-serif;
-  font-size:.75rem;font-weight:700;cursor:pointer;flex-shrink:0;
+/* EXAM SCHEDULE */
+.cal-section-title{font-size:.75rem;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px}
+.schedule-wrap{background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+.sch-accordion{border-bottom:1px solid var(--border)}
+.sch-accordion:last-child{border-bottom:none}
+.sch-head{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;cursor:pointer;transition:background .15s;
+  user-select:none;-webkit-tap-highlight-color:transparent
 }
-.check-btn:active{transform:scale(.93)}
-
-/* Question grid modal */
-.q-grid-wrap{
-  display:flex;flex-wrap:wrap;gap:7px;
-  padding:4px 0 8px;
+.sch-head:active{background:#f5f5f0}
+.sch-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.sch-dot-1{background:var(--blue)}
+.sch-dot-2{background:var(--green)}
+.sch-dot-3{background:var(--pink)}
+.sch-head-text{flex:1}
+.sch-name{font-size:.85rem;font-weight:700;color:var(--black);line-height:1.2}
+.sch-sub{font-size:.7rem;color:var(--muted);font-family:'Sarabun',sans-serif;margin-top:2px}
+.sch-arrow{font-size:.8rem;color:var(--muted);transition:transform .25s}
+.sch-arrow.open{transform:rotate(180deg)}
+.sch-body{
+  max-height:0;overflow:hidden;
+  transition:max-height .3s ease;
 }
-.q-cell{
-  width:38px;height:38px;border-radius:9px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:.78rem;font-weight:700;cursor:pointer;
-  transition:all .12s;flex-shrink:0;
-  background:#f0f0e8;color:var(--muted);border:2px solid transparent;
-  font-family:'Prompt',sans-serif;
+.sch-body.open{max-height:800px}
+.sch-table{width:100%;border-collapse:collapse;font-family:'Sarabun',sans-serif}
+.sch-table th{
+  background:#f5f5f0;font-size:.72rem;font-weight:700;
+  padding:8px 12px;text-align:left;color:var(--muted);
+  letter-spacing:.3px;border-bottom:1px solid var(--border)
 }
-.q-cell.answered{background:rgba(255,83,255,.12);color:#aa00aa;border-color:rgba(255,83,255,.35)}
-.q-cell.current{border-color:var(--blue);background:#fff;color:var(--blue);font-weight:800}
-.q-cell.answered.current{background:rgba(255,83,255,.18);border-color:var(--blue);color:#aa00aa}
-.q-cell:active{transform:scale(.88)}
-/* Planner */
-.planner-hdr{width:100%;background:var(--green);padding:18px 18px 22px;display:flex;align-items:center;gap:12px}
-.planner-hdr-back{width:36px;height:36px;border-radius:9px;border:1px solid rgba(0,0,0,.18);background:transparent;color:var(--black);font-size:1.1rem;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
-.planner-body{width:100%;max-width:420px;padding:18px 16px 120px;display:flex;flex-direction:column;gap:14px}
-.pl-card{background:#fff;border:1px solid var(--border);border-radius:15px;padding:18px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
-.pl-card-title{font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px}
-.pl-stat-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
-.pl-stat-label{font-size:.85rem;font-family:'Sarabun',sans-serif;color:var(--black)}
-.pl-stat-val{font-size:1.1rem;font-weight:800;color:var(--blue)}
-.pl-divider{height:1px;background:var(--border);margin:10px 0}
-.pl-highlight{background:rgba(51,223,147,.15);border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center}
-.pl-highlight-label{font-size:.82rem;font-family:'Sarabun',sans-serif;color:#006640}
-.pl-highlight-val{font-size:1.3rem;font-weight:800;color:#006640}
-.pl-hrs-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
-.pl-hrs-label{font-size:.88rem;font-family:'Sarabun',sans-serif;flex:1}
-.pl-hrs-select{border:2px solid var(--border);border-radius:9px;padding:8px 10px;font-family:'Prompt',sans-serif;font-size:.95rem;font-weight:700;color:var(--black);background:#fff;outline:none;width:90px;text-align:center}
-.pl-hrs-select.editing{border-color:#e63946;background:rgba(230,57,70,.05)}
-.progress-track{height:10px;background:#f0f0e8;border-radius:5px;overflow:hidden;margin-top:6px}
-.progress-fill{height:100%;border-radius:5px 0 0 5px;background:rgb(175,255,235);transition:width .4s ease,background .4s ease}
-.pl-progress-labels{display:flex;justify-content:space-between;font-size:.68rem;color:var(--muted);margin-top:4px;font-family:'Sarabun',sans-serif}
-.pl-lesson-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
-.pl-lesson-row:last-child{border-bottom:none}
-.pl-lesson-name{font-size:.82rem;font-family:'Sarabun',sans-serif;color:var(--black)}
-.pl-lesson-hrs{font-size:.88rem;font-weight:700;color:var(--blue)}
-.pl-btn-row{display:flex;gap:8px}
-.pl-btn-green{flex:1;padding:13px;background:var(--green);color:var(--black);border:none;border-radius:13px;font-family:'Prompt',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer}
-.pl-btn-outline{flex:1;padding:13px;background:#fff;color:var(--black);border:1px solid var(--border);border-radius:13px;font-family:'Prompt',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer}
-.pl-no-date{background:#fff8e6;border:1px dashed #e8c84a;border-radius:12px;padding:14px;text-align:center;font-size:.84rem;font-family:'Sarabun',sans-serif;color:#7a6000}
-.pl-toggle-btn{padding:10px;border-radius:10px;font-family:'Prompt',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;border:2px solid var(--border);background:#fff;color:var(--muted);transition:all .15s}
-.pl-toggle-btn.active{border-color:var(--green);background:rgba(51,223,147,.15);color:#006640}
-.pl-checkbox-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:background .12s}
-.pl-checkbox-row:has(input:checked){background:rgba(5,73,254,.06);border-color:rgba(5,73,254,.3)}
-.pl-checkbox-row input{width:16px;height:16px;accent-color:var(--blue);flex-shrink:0}
-.pl-checkbox-label{font-size:.84rem;font-family:'Sarabun',sans-serif;color:var(--black)}
+.sch-table td{
+  padding:9px 12px;font-size:.8rem;border-bottom:1px solid var(--border);
+  vertical-align:middle;line-height:1.4
+}
+.sch-table tr:last-child td{border-bottom:none}
+.sch-table tr:nth-child(even) td{background:#fafaf8}
+.sch-round{
+  display:inline-block;background:var(--blue);color:#fff;
+  font-size:.65rem;font-weight:700;padding:2px 8px;
+  border-radius:20px;white-space:nowrap
+}
+.sch-na{color:#ccc;font-size:.78rem}
+.sch-time{font-size:.75rem;color:var(--muted);margin-top:2px}
+#schedule-section{display:none}
+#schedule-section .cal-section-title{margin-top:8px}
 </style>
 </head>
 <body>
 
-<!-- ===== HOME ===== -->
+<!-- ========== HOME ========== -->
 <div class="screen active" id="home-screen">
   <div class="home-col">
     <div class="home-top">
-      <div class="badge-pill">Mock Quiz — จรรยาบรรณ CFP2</div>
-      <div class="home-title">เกมจำลอง<br>การสอบ</div>
-      <div class="home-sub" id="mock-countdown-text">— ตั้งวันสอบได้ที่ปุ่มชมพูด้านล่าง —</div>
+
+      <!-- Badge + Stars row: stars are OUTSIDE the badge pill -->
+      <div class="badge-row">
+        <div class="badge-pill">เกมช่วยจำ – CFP</div>
+        <div class="badge-stars">
+          <!-- Rounded star × 3 (gold #E4D64D, no sharp tips via large rx) -->
+          <svg width="18" height="18" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#E4D64D" d="M10,2.5 L11.6,7.2 H16.6 L12.6,10 L14.1,14.8 L10,12 L5.9,14.8 L7.4,10 L3.4,7.2 H8.4 Z"
+              stroke="#E4D64D" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+          </svg>
+          <svg width="18" height="18" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#E4D64D" d="M10,2.5 L11.6,7.2 H16.6 L12.6,10 L14.1,14.8 L10,12 L5.9,14.8 L7.4,10 L3.4,7.2 H8.4 Z"
+              stroke="#E4D64D" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+          </svg>
+          <svg width="18" height="18" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#E4D64D" d="M10,2.5 L11.6,7.2 H16.6 L12.6,10 L14.1,14.8 L10,12 L5.9,14.8 L7.4,10 L3.4,7.2 H8.4 Z"
+              stroke="#E4D64D" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="home-title">จรรยาบรรณ</div>
     </div>
 
-    <div id="set-list"></div>
+    <!-- Cards stack: position:relative so char-cfp2-wrap can bleed up -->
+    <div class="cards-stack" style="position:relative">
 
-    <div class="quiz-set-card" onclick="goToComingSoon()" style="background:var(--green);margin-top:0">
-      <div class="qsc-label" style="color:#fff">เกมอื่นๆ และแหล่งความรู้</div>
-      <div class="qsc-meta" style="color:rgba(255,255,255,.7)">เครื่องมือพัฒนาทักษะสายการเงิน</div>
-      <div class="qsc-badge" style="background:var(--pink);color:var(--black);margin-top:8px">ต่อไป →</div>
-      <div class="qsc-arrow" style="color:rgba(255,255,255,.5)">›</div>
-    </div>
-  </div>
+      <!-- CFP1 card — tall, text centered-left -->
+      <div class="main-card card-cfp1" onclick="goToComingSoon('CFP1')" style="cursor:pointer">
+        <div class="card-inner">
+          <div>
+            <div class="card-label" style="color:var(--yellow)">CFP1</div>
+            <div class="card-sub" style="color:#fff;opacity:1;font-weight:600">1 บทเรียน <span style="font-size:3em;line-height:0;vertical-align:middle">·</span> 1 ด่าน</div>
+          </div>
+        </div>
+      </div>
 
-  <div class="bottom-nav">
-    <div class="bottom-nav-line"></div>
-    <div class="bottom-nav-btns">
-      <button class="nav-btn nb-blue" onclick="goHome()">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 66" width="45" height="45"><path fill="none" stroke="#fff" stroke-width="2" stroke-miterlimit="10" d="M41,45.1h-17c-1.1,0-2-0.9-2-2V29.7c0-1,0.5-1.9,1.2-2.5l7.3-5.6c1.1-0.9,2.7-0.9,3.8,0l7.3,5.6c0.8,0.6,1.2,1.5,1.2,2.5v13.4C42.9,44.2,42.1,45.1,41,45.1z"/></svg>
-      </button>
-      <button class="nav-btn nb-pink" onclick="openDateModal()">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 66" width="45" height="45"><path fill="none" stroke="#fff" stroke-width="2" stroke-miterlimit="10" d="M41.9,45h-19c-1.4,0-2.5-1.1-2.5-2.5v-19c0-1.4,1.1-2.5,2.5-2.5h19c1.4,0,2.5,1.1,2.5,2.5v19C44.4,43.9,43.2,45,41.9,45z"/><line fill="none" stroke="#fff" stroke-width="2" stroke-miterlimit="10" x1="20.4" y1="28.3" x2="44.4" y2="28.3"/></svg>
-      </button>
-      <button class="nav-btn nb-green" onclick="goToPlanner()">
-        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 66" width="45" height="45" xml:space="preserve">
-          <circle fill="#fff" cx="33" cy="33" r="2.6"/>
-          <path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10" d="M33,17.8V21c6.6,0,12,5.4,12,12s-5.4,12-12,12s-12-5.4-12-12c0-2.4,0.7-4.7,2-6.6"/>
-          <line fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10" x1="30.7" y1="17.8" x2="35.3" y2="17.8"/>
-          <polyline fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10" points="38.8,30 32.9,33.3 27.1,23"/>
+      <!-- finger-1: absolute in cards-stack, right side, top of SVG at stack y=4px
+           SVG 188x226 rendered; shape inside at x:[42..158] y:[19..225]
+           right:-30 aligns shape right to card right; top:4 puts shape top ~23px from card top
+      -->
+      <div class="char-cfp1">
+        <svg id="finger1-svg" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 215 260" width="188" height="226">
+          <path fill="#33DF93" d="M181,259H48V88.5C48,51.8,77.8,22,114.5,22h0c36.7,0,66.5,29.8,66.5,66.5V259z"/>
+          <!-- white eye sockets -->
+          <circle fill="#fff" cx="69" cy="116" r="28"/>
+          <circle fill="#fff" cx="127" cy="116" r="28"/>
+          <!-- black pupils - animated -->
+          <circle id="f1-pupil-l" fill="#1A1A1A" cx="58" cy="116" r="14"/>
+          <circle id="f1-pupil-r" fill="#1A1A1A" cx="116" cy="116" r="14"/>
+          <!-- mouth - animated -->
+          <path id="f1-mouth" fill="none" stroke="#1A1A1A" stroke-width="3" stroke-linecap="round" stroke-miterlimit="10" d="M89,160c0,0,1.3,2.2,5.7,2.1c6.5-0.3,9.3-4.1,9.3-4.1"/>
         </svg>
-      </button>
+      </div>
+
+      <!-- CFP2 card — short, text bottom-right, finger-2 positioned via wrapper that bleeds up -->
+      <div class="main-card card-cfp2" onclick="goToLevelSelect()">
+        <div class="card-inner-right">
+          <div style="text-align:right">
+            <div class="card-label" style="color:var(--yellow)">CFP2</div>
+            <div class="card-sub" id="cfp2-card-sub" style="color:#fff;opacity:1;font-weight:600">— กำลังโหลด —</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- finger-2: absolute in cards-stack
+           SVG 182x181; shape inside at x:[22..165] y:[28..181]
+           top:167px → svg bottom=167+181=348=CFP2 bot ✓ shape bottom flush with CFP2
+           shape top in stack=167+28=195px → bleeds 44px above CFP2(239), 35px into CFP1
+           left:-2px slight overhang to match SVG layout
+      -->
+      <div class="char-cfp2-wrap">
+        <svg id="finger2-svg" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 209 208" width="182" height="181">
+          <path fill="#33DF93" d="M38,208h133V107.5c0-36.7-29.8-66.5-66.5-66.5h0C67.8,41,38,70.8,38,107.5V208z"/>
+          <!-- white eye sockets -->
+          <circle fill="#fff" cx="150" cy="135" r="28"/>
+          <circle fill="#fff" cx="92" cy="135" r="28"/>
+          <!-- black pupils - animated -->
+          <circle id="f2-pupil-r" fill="#1A1A1A" cx="161" cy="135" r="14"/>
+          <circle id="f2-pupil-l" fill="#1A1A1A" cx="103" cy="135" r="14"/>
+          <!-- mouth - animated -->
+          <path id="f2-mouth" fill="none" stroke="#1A1A1A" stroke-width="3" stroke-linecap="round" stroke-miterlimit="10" d="M130,179c0,0-1.3,2.2-5.7,2.1c-6.5-0.3-9.3-4.1-9.3-4.1"/>
+          <circle fill="#33DF93" cx="171" cy="93" r="18"/>
+          <circle fill="#33DF93" cx="43" cy="93" r="18"/>
+          <circle fill="#33DF93" cx="160" cy="68" r="18"/>
+          <circle fill="#33DF93" cx="135" cy="55" r="18"/>
+          <circle fill="#33DF93" cx="52" cy="68" r="18"/>
+          <circle fill="#33DF93" cx="77" cy="55" r="18"/>
+          <circle fill="#33DF93" cx="105" cy="50" r="18"/>
+        </svg>
+      </div>
+
+    </div><!-- /cards-stack -->
+
+    <!-- Small cards -->
+    <div class="small-row">
+      <div class="small-card sc-pink" onclick="goToCalendar()" style="cursor:pointer">
+        <div id="home-countdown" class="small-label" style="font-size:.78rem;line-height:1.5">ปฏิทินสอบ</div>
+      </div>
+      <div class="small-card sc-green" onclick="goToComingSoon('เกมอื่นๆ และแหล่งความรู้')">
+        <div class="small-label">เกมอื่นๆ<br>และแหล่งความรู้</div>
+      </div>
+    </div>
+
+  </div><!-- /home-col -->
+
+  <!-- Bottom Nav: 3 circles with exact icon SVGs from uploaded files -->
+  <div class="bottom-nav">
+  <div class="bottom-nav-line"></div>
+  <div class="bottom-nav-btns">
+    <!-- Icon-home (blue button) -->
+    <button class="nav-btn nb-blue">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 66" width="45" height="45">
+        <path fill="none" stroke="#fff" stroke-width="2" stroke-miterlimit="10"
+          d="M41,45.1h-17c-1.1,0-2-0.9-2-2V29.7c0-1,0.5-1.9,1.2-2.5l7.3-5.6c1.1-0.9,2.7-0.9,3.8,0l7.3,5.6c0.8,0.6,1.2,1.5,1.2,2.5v13.4C42.9,44.2,42.1,45.1,41,45.1z"/>
+      </svg>
+    </button>
+
+    <!-- Icon-calendar (pink button) -->
+    <button class="nav-btn nb-pink" onclick="goToCalendar()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 66" width="45" height="45">
+        <path fill="none" stroke="#fff" stroke-width="2" stroke-miterlimit="10"
+          d="M41.9,45h-19c-1.4,0-2.5-1.1-2.5-2.5v-19c0-1.4,1.1-2.5,2.5-2.5h19c1.4,0,2.5,1.1,2.5,2.5v19C44.4,43.9,43.2,45,41.9,45z"/>
+        <line fill="none" stroke="#fff" stroke-width="2" stroke-miterlimit="10" x1="20.4" y1="28.3" x2="44.4" y2="28.3"/>
+      </svg>
+    </button>
+
+    <!-- Icon-smile (green button) — stroke color changed to dark for green bg -->
+    <button class="nav-btn nb-green">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 66" width="45" height="45">
+        <path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10"
+          d="M29.4,32c0,0,1,1,3,1s3-1,3-1"/>
+        <circle fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10"
+          cx="32.4" cy="33" r="12"/>
+        <circle fill="#fff" cx="28.9" cy="26.4" r="1.9"/>
+        <circle fill="#fff" cx="34.9" cy="26.4" r="1.9"/>
+      </svg>
+    </button>
+
+  </div></div>
+</div><!-- /home-screen -->
+
+
+<!-- ========== CALENDAR ========== -->
+<div class="screen" id="calendar-screen">
+  <div class="cal-header">
+    <button class="back-btn" style="border-color:rgba(255,255,255,.3)" onclick="goHome()">←</button>
+    <div>
+      <div class="cal-htitle">ปฏิทินสอบ</div>
+      <div class="cal-hsub">ตั้งวันสอบ · นับถอยหลัง</div>
     </div>
   </div>
+  <div class="cal-body">
+
+    <!-- Countdown display -->
+    <div id="cal-countdown-box" class="countdown-display empty">
+      <div class="cd-empty-text">ยังไม่ได้ตั้งวันสอบ<br>เลือกวันด้านล่างได้เลย</div>
+    </div>
+
+    <!-- ดูรอบสอบ (full width) -->
+    <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:14px;cursor:pointer" onclick="toggleScheduleSection()">
+      <div style="display:flex;gap:5px;flex-shrink:0">
+        <span style="width:10px;height:10px;border-radius:50%;background:var(--blue);display:block"></span>
+        <span style="width:10px;height:10px;border-radius:50%;background:var(--green);display:block"></span>
+        <span style="width:10px;height:10px;border-radius:50%;background:var(--pink);display:block"></span>
+      </div>
+      <div style="flex:1">
+        <div style="font-weight:700;font-family:'Prompt',sans-serif;font-size:.88rem;color:var(--black)">📋 ดูรอบสอบ</div>
+        <div style="font-size:.72rem;color:var(--muted);font-family:'Sarabun',sans-serif;margin-top:2px">ฉบับ 1 · 2 เดิม · 2 ใหม่ · ปี 2569</div>
+      </div>
+      <div style="font-size:.75rem;color:var(--blue);font-weight:700;flex-shrink:0">ดูตาราง ▾</div>
+    </div>
+
+    <!-- เลือกวันสอบ (full width) -->
+    <div class="date-picker-wrap">
+      <div class="date-picker-label" style="font-weight:700;color:var(--black);font-family:'Prompt',sans-serif;font-size:.88rem;margin-bottom:12px">📅 เลือกวันสอบ</div>
+      <input type="date" id="exam-date-input" style="width:100%;padding:13px 14px;border:2px solid #e0ded6;border-radius:11px;font-family:'Prompt',sans-serif;font-size:1rem;color:#1A1A1A;background:#fff;outline:none;box-sizing:border-box;display:block">
+      <button class="date-save-btn" onclick="saveExamDate()">บันทึกวันสอบ</button>
+      <button class="date-clear-btn" onclick="clearExamDate()">ล้างวันที่</button>
+    </div>
+
+    <!-- Schedule Accordion (hidden by default) -->
+    <div id="schedule-section" style="display:none">
+      <div class="cal-section-title">รอบสอบ CFP ปี 2569</div>
+      <div class="schedule-wrap">
+
+        <!-- ฉบับ 1 -->
+        <div class="sch-accordion">
+          <div class="sch-head" onclick="toggleAccordion('sch1')">
+            <div class="sch-dot sch-dot-1"></div>
+            <div class="sch-head-text">
+              <div class="sch-name">ฉบับที่ 1</div>
+              <div class="sch-sub">พื้นฐานการวางแผนการเงิน ภาษีและจรรยาบรรณ</div>
+            </div>
+            <div class="sch-arrow" id="arrow-sch1">▾</div>
+          </div>
+          <div class="sch-body" id="body-sch1">
+            <table class="sch-table">
+              <tr><th>รอบ</th><th>วัน / วันที่</th><th>เวลา</th></tr>
+              <tr><td><span class="sch-round">1/69</span></td><td>ส. 28 มี.ค. 69</td><td><div>09.00–12.00</div></td></tr>
+              <tr><td><span class="sch-round">2/69</span></td><td>ส. 30 พ.ค. 69</td><td><div>09.00–12.00</div></td></tr>
+              <tr><td><span class="sch-round">3/69</span></td><td>ส. 18 มิ.ย. 69</td><td><div>09.00–12.00</div></td></tr>
+              <tr><td><span class="sch-round">4/69</span></td><td>อา. 20 ก.ย. 69</td><td><div>09.00–12.00</div></td></tr>
+              <tr><td><span class="sch-round">5/69</span></td><td>ส. 21 พ.ย. 69</td><td><div>09.00–12.00</div></td></tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- ฉบับ 2 เดิม -->
+        <div class="sch-accordion">
+          <div class="sch-head" onclick="toggleAccordion('sch2')">
+            <div class="sch-dot sch-dot-2"></div>
+            <div class="sch-head-text">
+              <div class="sch-name">ฉบับที่ 2 (หลักสูตรเดิม 85 ข้อ)</div>
+              <div class="sch-sub">การวางแผนการลงทุน</div>
+            </div>
+            <div class="sch-arrow" id="arrow-sch2">▾</div>
+          </div>
+          <div class="sch-body" id="body-sch2">
+            <table class="sch-table">
+              <tr><th>รอบ</th><th>วัน / วันที่</th><th>เวลา</th></tr>
+              <tr><td><span class="sch-round" style="background:var(--green);color:var(--black)">1/69</span></td><td>ส. 28 มี.ค. 69</td><td><div>13.30–16.30</div></td></tr>
+              <tr><td><span class="sch-round" style="background:var(--green);color:var(--black)">2/69</span></td><td>ส. 30 พ.ค. 69</td><td><div>13.30–16.30</div></td></tr>
+              <tr><td><span class="sch-round" style="background:var(--green);color:var(--black)">3/69</span></td><td>ส. 18 มิ.ย. 69</td><td><div>13.30–16.30</div></td></tr>
+              <tr><td><span class="sch-round" style="background:var(--green);color:var(--black)">4/69</span></td><td>อา. 20 ก.ย. 69</td><td><div>13.30–16.30</div></td></tr>
+              <tr><td><span class="sch-round" style="background:var(--green);color:var(--black)">5/69</span></td><td>ส. 21 พ.ย. 69</td><td><div>13.30–16.30</div></td></tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- ฉบับ 2 ใหม่ -->
+        <div class="sch-accordion">
+          <div class="sch-head" onclick="toggleAccordion('sch3')">
+            <div class="sch-dot sch-dot-3"></div>
+            <div class="sch-head-text">
+              <div class="sch-name">ฉบับที่ 2 (หลักสูตรปรับปรุงใหม่ 120 ข้อ)</div>
+              <div class="sch-sub">การวางแผนการลงทุน</div>
+            </div>
+            <div class="sch-arrow" id="arrow-sch3">▾</div>
+          </div>
+          <div class="sch-body" id="body-sch3">
+            <table class="sch-table">
+              <tr><th>รอบ</th><th>วัน / วันที่</th><th>เวลา</th></tr>
+              <tr><td><span class="sch-round" style="background:var(--pink)">1/69</span></td><td>ส. 28 มี.ค. 69</td><td><div>13.30–18.00</div></td></tr>
+              <tr><td><span class="sch-round" style="background:var(--pink)">2/69</span></td><td class="sch-na">—</td><td class="sch-na">ไม่เปิดสอบ</td></tr>
+              <tr><td><span class="sch-round" style="background:var(--pink)">3/69</span></td><td class="sch-na">—</td><td class="sch-na">ไม่เปิดสอบ</td></tr>
+              <tr><td><span class="sch-round" style="background:var(--pink)">4/69</span></td><td>อา. 20 ก.ย. 69</td><td><div>13.30–18.00</div></td></tr>
+              <tr><td><span class="sch-round" style="background:var(--pink)">5/69</span></td><td class="sch-na">—</td><td class="sch-na">ไม่เปิดสอบ</td></tr>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+  <!-- Bottom Nav -->
+  <div class="bottom-nav">
+  <div class="bottom-nav-line"></div>
+  <div class="bottom-nav-btns">    <button class="nav-btn nb-blue" onclick="goHome()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 66" width="45" height="45">
+        <path fill="none" stroke="#fff" stroke-width="2" stroke-miterlimit="10" d="M41,45.1h-17c-1.1,0-2-0.9-2-2V29.7c0-1,0.5-1.9,1.2-2.5l7.3-5.6c1.1-0.9,2.7-0.9,3.8,0l7.3,5.6c0.8,0.6,1.2,1.5,1.2,2.5v13.4C42.9,44.2,42.1,45.1,41,45.1z"/>
+      </svg>
+    </button>
+    <button class="nav-btn nb-pink" onclick="goToCalendar()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 66" width="45" height="45">
+        <path fill="none" stroke="#fff" stroke-width="2" stroke-miterlimit="10" d="M41.9,45h-19c-1.4,0-2.5-1.1-2.5-2.5v-19c0-1.4,1.1-2.5,2.5-2.5h19c1.4,0,2.5,1.1,2.5,2.5v19C44.4,43.9,43.2,45,41.9,45z"/>
+        <line fill="none" stroke="#fff" stroke-width="2" stroke-miterlimit="10" x1="20.4" y1="28.3" x2="44.4" y2="28.3"/>
+      </svg>
+    </button>
+    <button class="nav-btn nb-green">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 66" width="45" height="45">
+        <path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10" d="M29.4,32c0,0,1,1,3,1s3-1,3-1"/>
+        <circle fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10" cx="32.4" cy="33" r="12"/>
+        <circle fill="#fff" cx="28.9" cy="26.4" r="1.9"/>
+        <circle fill="#fff" cx="34.9" cy="26.4" r="1.9"/>
+      </svg>
+    </button>
+  </div></div>
 </div>
 
-<!-- ===== QUIZ ===== -->
-<div class="screen" id="quiz-screen">
-  <div class="quiz-bar">
-    <button class="back-btn" onclick="confirmBackToHome()">←</button>
-    <div class="qb-info">
-      <div class="qb-title" id="quiz-set-title">—</div>
-      <div class="qb-sub" id="quiz-set-sub">—</div>
-    </div>
-    <button class="check-btn" id="check-btn" onclick="openGridModal()">เช็ค</button>
-    <div class="q-counter" id="q-counter">
-      <div class="q-counter-val" id="q-counter-val">0/5</div>
-      <div class="q-counter-lbl" id="q-counter-lbl">ตอบแล้ว</div>
-    </div>
-    <div class="timer-box" id="timer-box" style="display:none">
-      <div class="timer-val" id="timer-val">00:00</div>
-      <div class="timer-lbl">เวลา</div>
+<!-- ========== LEVEL SELECT ========== -->
+<div class="screen" id="level-screen">
+  <div class="lvl-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div>
+      <div class="lvl-htitle">จรรยาบรรณ CFP2</div>
+      <div class="lvl-hsub">Drag &amp; Drop · เลือกด่าน</div>
     </div>
   </div>
-  <div class="progress-wrap">
-    <div class="progress-bar" id="progress-bar" style="width:0%"></div>
-  </div>
-  <div class="quiz-body" id="quiz-body"></div>
-  <div class="quiz-nav">
-    <div class="quiz-nav-line"></div>
-    <div class="quiz-nav-btns">
-      <button class="btn-prev" id="btn-prev" onclick="prevQ()">← ก่อนหน้า</button>
-      <button class="btn-next" id="btn-next" onclick="nextQ()">ถัดไป →</button>
-    </div>
-  </div>
+  <div class="lvl-list" id="lvl-list-container" style="padding-bottom:100px"></div>
+  <div class="bottom-nav">
+  <div class="bottom-nav-line"></div>
+  <div class="bottom-nav-btns">    <button class="nav-btn nb-blue" onclick="goHome()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 66" width="45" height="45"><path fill="none" stroke="#fff" stroke-width="2" stroke-miterlimit="10" d="M41,45.1h-17c-1.1,0-2-0.9-2-2V29.7c0-1,0.5-1.9,1.2-2.5l7.3-5.6c1.1-0.9,2.7-0.9,3.8,0l7.3,5.6c0.8,0.6,1.2,1.5,1.2,2.5v13.4C42.9,44.2,42.1,45.1,41,45.1z"/></svg>
+    </button>
+    <button class="nav-btn nb-pink" onclick="goToCalendar()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 66" width="45" height="45"><path fill="none" stroke="#fff" stroke-width="2" stroke-miterlimit="10" d="M41.9,45h-19c-1.4,0-2.5-1.1-2.5-2.5v-19c0-1.4,1.1-2.5,2.5-2.5h19c1.4,0,2.5,1.1,2.5,2.5v19C44.4,43.9,43.2,45,41.9,45z"/><line fill="none" stroke="#fff" stroke-width="2" stroke-miterlimit="10" x1="20.4" y1="28.3" x2="44.4" y2="28.3"/></svg>
+    </button>
+    <button class="nav-btn nb-green">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 66" width="45" height="45"><path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10" d="M29.4,32c0,0,1,1,3,1s3-1,3-1"/><circle fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10" cx="32.4" cy="33" r="12"/><circle fill="#fff" cx="28.9" cy="26.4" r="1.9"/><circle fill="#fff" cx="34.9" cy="26.4" r="1.9"/></svg>
+    </button>
+  </div></div>
 </div>
 
-<!-- ===== RESULT ===== -->
+<!-- ========== GAME ========== -->
+<div class="screen" id="game-screen">
+  <div class="game-bar">
+    <button class="back-btn" onclick="confirmBack()">←</button>
+    <div class="gb-info">
+      <div class="gb-title" id="game-title">—</div>
+      <div class="gb-sub" id="game-sub">—</div>
+    </div>
+    <div class="timer-box" id="timer-box">
+      <div class="timer-val" id="timer-val">90</div>
+      <div class="timer-lbl">วินาที</div>
+    </div>
+  </div>
+  <div class="game-body" id="game-body"></div>
+</div>
+
+<!-- ========== RESULT ========== -->
 <div class="screen" id="result-screen">
   <div class="result-hdr" id="result-hdr">
     <span class="result-emoji" id="result-emoji">🎉</span>
-    <div class="result-heading" id="result-heading">—</div>
+    <div class="result-heading" id="result-heading">ยอดเยี่ยม!</div>
     <div class="result-sublabel" id="result-sublabel">—</div>
   </div>
   <div class="result-body">
     <div class="score-card">
       <div class="score-stat"><div class="score-val" id="r-score" style="color:var(--blue)">—</div><div class="score-lbl">คะแนน</div></div>
       <div class="score-stat"><div class="score-val" id="r-correct" style="color:#22c07c">—</div><div class="score-lbl">ถูก/ทั้งหมด</div></div>
-      <div class="score-stat"><div class="score-val" id="r-pct" style="color:#e76f51">—</div><div class="score-lbl">เปอร์เซ็นต์</div></div>
+      <div class="score-stat"><div class="score-val" id="r-time" style="color:#e76f51">—</div><div class="score-lbl">วินาทีที่ใช้</div></div>
     </div>
-    <div class="review-box">
-      <div class="review-hd">สรุปคำตอบ — แตะเพื่อดูโจทย์</div>
-      <div id="review-list"></div>
-    </div>
+    <div class="review-box" id="review-box"></div>
+    <button class="btn-green" id="explain-btn" onclick="openExplain()" style="display:none">📖 คำอธิบายเพิ่มเติม</button>
     <div class="result-btns">
-      <button class="btn-blue" onclick="retryQuiz()">🔄 เล่นอีกครั้ง (สลับตัวเลือกใหม่)</button>
-      <button class="btn-outline" onclick="goHome()">← กลับหน้าหลัก</button>
+      <button class="btn-blue" onclick="retryLevel()">🔄 เล่นอีกครั้ง</button>
+      <button class="btn-outline" onclick="backToLevels()">← เลือกด่าน</button>
     </div>
   </div>
+  <div class="bottom-nav">
+  <div class="bottom-nav-line"></div>
+  <div class="bottom-nav-btns">    <button class="nav-btn nb-blue" onclick="goHome()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 66" width="45" height="45"><path fill="none" stroke="#fff" stroke-width="2" stroke-miterlimit="10" d="M41,45.1h-17c-1.1,0-2-0.9-2-2V29.7c0-1,0.5-1.9,1.2-2.5l7.3-5.6c1.1-0.9,2.7-0.9,3.8,0l7.3,5.6c0.8,0.6,1.2,1.5,1.2,2.5v13.4C42.9,44.2,42.1,45.1,41,45.1z"/></svg>
+    </button>
+    <button class="nav-btn nb-pink" onclick="goToCalendar()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 66" width="45" height="45"><path fill="none" stroke="#fff" stroke-width="2" stroke-miterlimit="10" d="M41.9,45h-19c-1.4,0-2.5-1.1-2.5-2.5v-19c0-1.4,1.1-2.5,2.5-2.5h19c1.4,0,2.5,1.1,2.5,2.5v19C44.4,43.9,43.2,45,41.9,45z"/><line fill="none" stroke="#fff" stroke-width="2" stroke-miterlimit="10" x1="20.4" y1="28.3" x2="44.4" y2="28.3"/></svg>
+    </button>
+    <button class="nav-btn nb-green">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 66" width="45" height="45"><path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10" d="M29.4,32c0,0,1,1,3,1s3-1,3-1"/><circle fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10" cx="32.4" cy="33" r="12"/><circle fill="#fff" cx="28.9" cy="26.4" r="1.9"/><circle fill="#fff" cx="34.9" cy="26.4" r="1.9"/></svg>
+    </button>
+  </div></div>
 </div>
 
 <!-- MODAL -->
-<div class="modal-overlay" id="detail-modal" onclick="closeModalOuter(event)">
+<div class="modal-overlay" id="explain-modal" onclick="closeOuter(event,'explain-modal')">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-q-num" id="modal-q-num"></div>
-    <div class="modal-q-text" id="modal-q-text"></div>
-    <div class="modal-choices" id="modal-choices"></div>
-    <button class="modal-close" onclick="closeModal()">ปิด</button>
+    <div class="modal-title">📖 คำอธิบายเพิ่มเติม</div>
+    <div id="explain-content"></div>
+    <button class="modal-close" onclick="closeModal('explain-modal')">ปิด</button>
   </div>
 </div>
 
 <script>
-// ===== DATA =====
-const SETS = [
-  {
-    name: "ชุดที่ 1 — แนวปฏิบัติการขายและบริการ",
-    questions: [
-      {q:"ข้อใดไม่ใช่เป้าหมายเพื่อให้ผู้ประกอบธุรกิจบรรลุเป้าหมาย",choices:["ลูกค้ามั่นใจได้ว่าติดต่อกับผู้ประกอบธุรกิจที่ให้ความสำคัญกับหลัก fair dealing","ลูกค้าได้รับข้อมูลและการบอกกล่าวที่ชัดเจนเหมาะสมจากคนขาย","ลูกค้าได้รับคำแนะนำที่มีคุณภาพและการเสนอขายผลิตภัณฑ์ที่เหมาะสม","ทุกข้อเป็นเป้าหมาย"],answer:3},
-      {q:"วิธีการจ่ายค่าตอบแทนข้อใดถือว่าไม่เหมาะสม",choices:["จ่ายผลตอบแทนตามยอดขายที่ผู้ติดต่อนักลงทุนทำได้","จ่ายผลตอบแทนตามคุณภาพและระดับความยากง่ายของการให้บริการ","จ่ายผลตอบแทนโดยคำนึงถึงประโยชน์ของลูกค้าและการให้บริการเป็นหลัก","กำหนดอัตราจ่ายผลตอบแทนโดยระมัดระวังไม่ให้เกิด product-focused และนำไปสู่ mis-selling"],answer:0},
-      {q:"การไม่ให้ผู้แนะนำเก็บเอกสารของผู้ลงทุนไว้ที่ตนเอง เนื่องจากสาเหตุใด",choices:["ป้องกันการปลอมแปลงเอกสาร","ผู้แนะนำการลงทุนสามารถตรวจสอบข้อมูลลูกค้าได้ทันที","ป้องกันข้อมูลการซื้อขายของลูกค้ารั่วไหล","หากมีเหตุฉุกเฉินสามารถติดต่อลูกค้าได้ทันที"],answer:0},
-      {q:"สาเหตุที่มีการแบ่งแยก Front office และ Back office ออกจากกัน เนื่องจาก",choices:["ป้องกันความขัดแย้งทางผลประโยชน์","ป้องกันการใช้ข้อมูลภายใน","เพื่อให้เกิดการสอบทานและลดความผิดพลาดในการปฏิบัติงาน","ถูกทุกข้อ"],answer:2},
-      {q:"ข้อใดไม่ใช่หน้าที่ของ Compliance",choices:["อบรมความรู้ความเข้าใจระเบียบในการปฏิบัติงานให้พนักงาน","ตรวจสอบการทำงานให้พนักงานทำงานอย่างถูกต้องตามกฎเกณฑ์ปฏิบัติงาน","จัดอบรมต่อใบอนุญาตการเป็นผู้ติดต่อนักลงทุนที่จะหมดอายุให้พนักงาน","ออกกฎระเบียบในการปฏิบัติงานให้เป็นไปตามกฎของ กลต. และ ตลท."],answer:2},
-      {q:"ข้อใดไม่ถูกต้องเกี่ยวกับการบริหารสินทรัพย์ของลูกค้า",choices:["เอาเงินของลูกค้าไปใส่ไว้ในบัญชีเดียวกับบริษัท","แยกทรัพย์สินของลูกค้ากับบริษัทออกจากกัน","มีการจัดทำบัญชีทรัพย์สินของลูกค้าทุกราย","มีการ update ความเคลื่อนไหวสม่ำเสมอ"],answer:0},
-      {q:"ตัวเลือกใดต่อไปนี้ไม่ใช่หน้าที่ของผู้แนะนำการลงทุน",choices:["ให้คำแนะนำหลักทรัพย์แก่ลูกค้า","ติดต่อ ชวนลูกค้าให้มีการลงทุน","วางแผนการลงทุนให้ลูกค้า","แนะนำแนวทางการจัดสรรสินทรัพย์ลงทุนเบื้องต้น"],answer:2},
-      {q:"บริษัทหลักทรัพย์ A ทำหน้าที่เป็นผู้จัดจำหน่ายหลักทรัพย์ที่เสนอขายต่อประชาชนในวงกว้าง บริษัทหลักทรัพย์ A ถูกห้ามชักชวนหรือให้คำแนะนำตั้งแต่กี่วันก่อนวันเสนอขาย จนถึงวันปิดการขาย",choices:["ก่อนขาย 5 วัน","ก่อนขาย 15 วัน","หลังปิดการขาย 15 วัน","หลังปิดการขาย 30 วัน"],answer:0},
-      {q:"ข้อใดเป็นแนวทางปฏิบัติในการขายและให้บริการด้านผลิตภัณฑ์ให้เหมาะสมกับลูกค้าแต่ละประเภท",choices:["กรณีผลิตภัณฑ์ที่มีความเสี่ยงสูง ไม่ว่าลูกค้าจะลงทุนกี่ครั้ง จะต้องดำเนินการตามขั้นตอนในการให้คำแนะนำตั้งแต่ขั้นตอนแรกถึงขั้นตอนสุดท้ายเช่นเดิม","คนขายจำเป็นจะต้องอธิบายลักษณะและความเสี่ยงที่สำคัญของผลิตภัณฑ์ที่มีความเสี่ยงสูงทุกครั้ง แม้ว่าลูกค้าจะเคยลงทุนแล้วก็ตาม","ลูกค้าที่มีความเปราะบาง ควรได้รับความคุ้มครองมากกว่ากรณีปกติ","ผู้จัดการสาขาหรือหัวหน้าไม่จำเป็นจะต้องตรวจสอบขั้นตอนการให้บริการแก่ลูกค้า ไม่ว่ากรณีใดๆ"],answer:2},
-      {q:"ข้อใดไม่ถูกต้องเกี่ยวกับการรวบรวมข้อมูลเพื่อการวิเคราะห์ข้อมูลทางการเงินเพื่อวางแผนการลงทุนให้กับลูกค้า",choices:["ลูกค้ามักประเมินค่าใช้จ่ายตอนเกษียณอายุต่ำกว่าความเป็นจริง","ลูกค้ามักไม่คำนึงถึงค่าใช้จ่ายในการซื้อประกันชีวิต","ในกรณีที่ลูกค้ามีครอบครัว ผู้ที่มีรายได้หลักเท่านั้น ที่จะเป็นผู้ให้ข้อมูล","ลูกค้าอาจไม่ตระหนักถึงค่าใช้จ่ายในการศึกษาของบุตร ซึ่งเป็นเงินจำนวนมาก"],answer:2},
-      {q:"ข้อใดไม่เกี่ยวข้องกับการพิจารณาเรื่องความเสี่ยงในการให้คำแนะนำการลงทุน",choices:["อายุ","วัตถุประสงค์ในการลงทุน","วุฒิการศึกษา","แหล่งที่มาของเงินลงทุน"],answer:2},
-      {q:"ขั้นตอนแรกในกระบวนการบริหารการลงทุนในหลักทรัพย์ให้ลูกค้าคือ",choices:["ทำความรู้จักลูกค้าและแนะนำผลิตภัณฑ์","รวบรวมข้อมูลส่วนบุคคล","วิเคราะห์และประเมินผล","การบริหารกลุ่มหลักทรัพย์"],answer:0},
-      {q:"ข้อใดกล่าวได้ถูกต้องเกี่ยวกับการให้คำแนะนำที่เหมาะสมตามขั้นตอนที่ถูกต้อง",choices:["รวบรวมข้อมูล วิเคราะห์ข้อมูลและประเมิน ตั้งและบริหารกลุ่มหลักทรัพย์","วิเคราะห์ข้อมูลและประเมินระดับความเสี่ยง จัดสรรสินทรัพย์ที่เหมาะสมกับผู้รับคำปรึกษา สร้างและบริหารกลุ่มหลักทรัพย์","รวบรวมข้อมูล วิเคราะห์และประเมินความเสี่ยง จัดสรรสินทรัพย์ลงทุน สร้างและบริหารกลุ่มหลักทรัพย์ ติดตามวัดผลและเปลี่ยนแปลงกลุ่มหลักทรัพย์","รวบรวมข้อมูลส่วนบุคคล การตรวจสอบแหล่งเงินทุน วิเคราะห์ข้อมูลและประเมินความเสี่ยง จัดสรรสินทรัพย์ลงทุน ติดตามและวัดผลการลงทุน"],answer:2},
-      {q:"นักลงทุนประเภทเชิงรุก (Active Investor) คือนักลงทุนที่รับความเสี่ยงอย่างไร และมีรูปแบบผลตอบแทนตามข้อใด",choices:["รับความเสี่ยงได้น้อยกว่านักลงทุนทั่วไป รูปแบบผลตอบแทนความปลอดภัยของเงินลงทุน","รับความเสี่ยงได้สูงกว่านักลงทุนทั่วไป รูปแบบผลตอบแทนเพิ่มมูลค่าของเงินลงทุน","รับความเสี่ยงได้มากกว่านักลงทุนทั่วไป รูปแบบผลตอบแทนความปลอดภัยของเงินลงทุน","รับความเสี่ยงได้ต่ำกว่านักลงทุนทั่วไป รูปแบบผลตอบแทนเพิ่มมูลค่าของเงินลงทุน"],answer:1},
-      {q:"นางสาวเออายุ 65 ปี มีเงินฝาก 30 ล้านบาท เคยลงทุนตราสารหนี้ 3 ปี ไม่เคยลงทุนตราสารทุนหรือตราสารหนี้เสี่ยงสูงเพราะกลัวเสียเงินต้น ต้องการลงทุนเพื่อดำรงชีพ จงประเมินความสามารถและความเต็มใจรับความเสี่ยง",choices:["ความสามารถและความเต็มใจรับความเสี่ยงระดับสูง","ความสามารถและความเต็มใจรับความเสี่ยงระดับต่ำ","ความสามารถรับความเสี่ยงสูง เต็มใจรับความเสี่ยงต่ำ","ความสามารถรับความเสี่ยงต่ำ ความเต็มใจรับความเสี่ยงสูง"],answer:2}
-    ]
-  },
-  {
-    name: "ชุดที่ 2 — มาตรฐานการปฏิบัติงาน",
-    questions: [
-      {q:"น.ส.ชบา ได้ขอหลักฐานของพี่ชายมาเปิดบัญชีซื้อขายหลักทรัพย์ โดยเมื่อเปิดบัญชีได้แล้ว ก็ขอ username และ password มาทำรายการซื้อขาย ซึ่งเมื่อได้กำไรจากการขายก็แบ่งกำไรส่วนหนึ่งเข้าบัญชีให้พี่ชาย การกระทำของ น.ส.ชบา ถือว่าผิดจรรยาบรรณในเรื่องใด",choices:["นำทรัพย์สินของบริษัทไปใช้โดยมิชอบ","ใช้ประโยชน์จากข้อมูลภายใน","แสวงหาผลประโยชน์ให้แก่ตนเองหรือบุคคลอื่น","นำข้อมูลของลูกค้าไปใช้โดยลูกค้าไม่อนุญาต"],answer:2},
-      {q:"ข้อใดไม่ใช่หน้าที่ของผู้ติดต่อผู้ลงทุน",choices:["ไม่ยื่นเอกสารเท็จต่อบริษัทในการเปิดบัญชีให้ลูกค้า","ตรวจสอบเอกสารหลักฐานการเปิดบัญชีกับฉบับจริง","เป็นตัวกลางในการจัดหาเงินกู้ให้ลูกค้า","ทักท้วงลูกค้าที่ส่งคำสั่งที่มีลักษณะเป็นการผลักดันราคา"],answer:2},
-      {q:"ข้อใดเป็นการกระทำอันไม่เป็นธรรมเกี่ยวกับการซื้อขายหลักทรัพย์",choices:["ไม่เปิดเผยข้อมูลที่อาจทำให้ผู้ลงทุนและตลาดทุนเสียหาย","ใช้ประโยชน์จากข้อมูลที่ตนล่วงรู้มา","ไม่ซื้อขายหลักทรัพย์ที่เป็นการสร้างราคาหลักทรัพย์","ต้องไม่ใช้หรือยินยอมให้ใช้บัญชี nominee ในการซื้อขายหลักทรัพย์"],answer:1},
-      {q:"นาย A เป็นเพื่อนกับนาย B ที่เป็นที่ปรึกษาการลงทุน นาย A อยากลงทุนจึงนำเอกสารไปให้นาย B แต่นาย B จะส่งเรื่องให้แต่เอกสารไม่ได้เซ็นอะไรไว้ นาย B จึงเขียนแทนแล้วโทรบอกภายหลัง การกระทำนี้ผิดจรรยาบรรณข้อใด",choices:["แสวงหาผลประโยชน์","ไม่ระมัดระวัง","ไม่ซื่อสัตย์สุจริต","เอาเปรียบลูกค้า"],answer:2},
-      {q:"ข้อใดเป็นการกระทำที่ไม่ถูกต้อง",choices:["นายเอไม่ส่งคำสั่งซื้อขายที่ผิดปกติ","นายเอซื้อขายหลักทรัพย์แทนลูกค้าที่ไปต่างประเทศ โดยได้รับอนุญาตจากลูกค้า","นายบีส่งคำสั่งซื้อขายหลักทรัพย์จากเลขาของลูกค้าที่ไปต่างประเทศ โดยมีหนังสือมอบหมายเป็นลายลักษณ์อักษรจากลูกค้า","นายเอไม่บอกข่าวลือที่เกิดขึ้นในตลาดหลักทรัพย์ให้ลูกค้าทราบ"],answer:1},
-      {q:"ข้อใดเป็นการกระทำที่ไม่ถูกต้อง (ข้อที่ 15)",choices:["โทรติดต่อลูกค้า แต่เลขาเป็นคนรับโทรศัพท์ และแจ้งว่าลูกค้าให้ขายหุ้นโดยไม่มีหนังสือมอบอำนาจ ผู้แนะนำการลงทุนจึงปฏิเสธที่จะให้บริการ","นำข้อมูลของลูกค้ามาแจ้งให้กับ IC ในทีมเดียวกันให้ทราบข้อมูลของลูกค้าเหมือนกันทั้งหมด เพื่อจะได้ดูแลลูกค้าได้หาก IC คนใดคนหนึ่งไม่ว่าง","ผู้แนะนำการลงทุนได้รับการติดต่อจากภรรยาของผู้ลงทุน ให้แจ้งยอดคงเหลือของพอร์ตการลงทุน แต่ผู้แนะนำการลงทุนปฏิเสธที่จะให้ข้อมูลดังกล่าว","ถูกทุกข้อ"],answer:1},
-      {q:"การกระทำในข้อใด ไม่ถือว่าผิดจรรยาบรรณเรื่องการปฏิบัติหน้าที่หรือให้บริการด้วยความซื่อสัตย์สุจริต",choices:["ให้คำแนะนำโดยใช้บทวิเคราะห์ของบริษัทหลักทรัพย์อื่น และได้แจ้งให้ลูกค้ารับทราบถึงแหล่งที่มา","นำข้อมูลของลูกค้าไปใช้เพื่อเสนอขายประกันชีวิต","แนะนำชักชวนญาติหรือเพื่อนที่ไม่มีความรู้เรื่องการลงทุนมาเปิดบัญชีซื้อขายหลักทรัพย์","เปิดบัญชีซื้อขายหลักทรัพย์โดยใช้ชื่อบุคคลอื่น"],answer:0},
-      {q:"ข้อใดถือว่ามีความผิดฐาน Insider trading",choices:["นาย ก. เป็นผู้บริหารบริษัท ให้สัมภาษณ์นักข่าวว่าโรงงานจะมีกำลังการผลิตเพิ่มขึ้น 2 เท่าในไตรมาสนี้ แต่ความจริงเครื่องจักรจะติดตั้งล่าช้าไปถึง 3 เดือน","นาง ข. เป็นอดีตผู้ตรวจสอบบัญชีของบริษัท ทำการวิเคราะห์งบการเงินของบริษัทแล้วตัดสินใจสั่งซื้อขายหุ้นบริษัทนั้น","นาย ค. กรรมการบริษัท ออกจากห้องประชุมแล้วทราบว่าบริษัทจะขาดทุน 1,000 ล้านบาท จึงมีคำสั่งขายหุ้นทันทีก่อนส่งรายงานการประชุมนี้ไปที่ตลาดหลักทรัพย์ฯ","นาย ง. สั่งขายหุ้นของบริษัท เนื่องจากบริษัทขาดทุน และได้รายงานข้อมูลผลการขาดทุนเข้าไปยังตลาดหลักทรัพย์แล้ว"],answer:2}
-    ]
-  },
-  {
-    name: "ชุดที่ 3 — การให้คำแนะนำการลงทุนที่เหมาะสม",
-    questions: [
-      {q:"ในการให้คำแนะนำแบบเฉพาะเจาะจง ข้อมูลใดของลูกค้าที่จำเป็นต้องรู้น้อยที่สุด (KYC)",choices:["รายได้ต่อปี ปริมาณทรัพย์สิน","ความเสี่ยงที่ยอมรับได้","สัญชาติ เชื้อชาติ ศาสนา","สถานภาพสมรส จำนวนบุตร (ถ้ามี)"],answer:2},
-      {q:"นายโดมอายุ 30 ปี รายได้ 70,000 บาท/เดือน คอนโดผ่อนหมดแล้ว มีรถมือสอง รายจ่าย 30,000 บาท/เดือน ต้องการลงทุนแค่เงินฝากและพันธบัตร ความสามารถและความเต็มใจรับความเสี่ยงเป็นอย่างไร",choices:["ความสามารถในการรับความเสี่ยงต่ำ ความเต็มใจในการรับความเสี่ยงสูง","ความสามารถในการรับความเสี่ยงสูง ความเต็มใจในการรับความเสี่ยงต่ำ","ความสามารถในการรับความเสี่ยงต่ำ ความเต็มใจในการรับความเสี่ยงต่ำ","ความสามารถในการรับความเสี่ยงสูง ความเต็มใจในการรับความเสี่ยงสูง"],answer:1},
-      {q:"ข้อใดไม่ใช่กระบวนการรวบรวมข้อมูลและการวิเคราะห์ลูกค้า",choices:["การจัดประเภทลูกค้าและรู้จักตัวแทนที่แท้จริงของลูกค้า","การทำความรู้จักกับลูกค้าและการประเมินความเหมาะสมในการลงทุน","การประเมินความรู้ความสามารถในการลงทุนของลูกค้า","การจัดทำ Knowledge Assessment เฉพาะลูกค้าที่เป็นกลุ่ม HNW เท่านั้น"],answer:3},
-      {q:"ความต้องการจากการลงทุนของนักลงทุนที่มุ่งหวังผล Active investor คือข้อใด",choices:["ต้องการผลตอบแทนสูงกว่าผลตอบแทนของตลาดหลักทรัพย์ และสามารถรับความเสี่ยงที่อาจเพิ่มขึ้นได้","ต้องการผลตอบแทนสูงกว่าผลตอบแทนของตลาดหลักทรัพย์ และไม่สามารถรับความเสี่ยงที่อาจเพิ่มขึ้นได้","ต้องการผลตอบแทนเท่ากับผลตอบแทนของตลาดหลักทรัพย์ และสามารถรับความเสี่ยงที่อาจเพิ่มขึ้นได้","ต้องการผลตอบแทนเท่ากับผลตอบแทนของตลาดหลักทรัพย์ และไม่สามารถรับความเสี่ยงที่อาจเพิ่มขึ้นได้"],answer:0},
-      {q:"ปัจจัยใดดังต่อไปนี้จะมีผลกระทบต่ออัตราผลตอบแทนจากการลงทุนมากที่สุด",choices:["การจัดสรรเงินทุน (Asset Allocation)","การคัดเลือกหลักทรัพย์เพื่อการลงทุน","การจับจังหวะการลงทุน","การคัดเลือกผู้จัดการกองทุน"],answer:0},
-      {q:"ข้อใดดังต่อไปนี้แสดงถึงวงจรชีวิตของความมั่งคั่งของบุคคลเหล่านี้ได้ถูกต้อง: A หญิงหม้าย 65 ปี, B สามีภรรยา 55 ปี บุตรเพิ่งจบ, C สามีภรรยา 30 ปี ยังไม่มีบุตร",choices:["A ระยะการใช้จ่าย B ระยะมั่นคง C ระยะสะสม","A ระยะสะสม B ระยะมั่นคง C ระยะการใช้จ่าย","A ระยะการใช้จ่าย B ระยะสะสม C ระยะมั่นคง","A ระยะมั่นคง B ระยะสะสม C ระยะการใช้จ่าย"],answer:0},
-      {q:"วัตถุประสงค์การลงทุนที่ต้องการให้เงินลงทุนมีความมั่นคง ไม่ลดลง เนื่องจากรับความเสี่ยงได้น้อยมากหรือไม่ได้เลย คือข้อใด",choices:["Current income","Capital protection","Capital appreciation","Total return"],answer:1},
-      {q:"ผู้ลงทุนที่ต้องการให้เงินลงทุนขยายตัวอย่างรวดเร็ว (Capital Appreciation) สามารถให้ผลตอบแทนสม่ำเสมอและรับความเสี่ยงได้ปานกลาง ควรลงทุนในตราสารใด",choices:["หุ้นสามัญ DEF ของบริษัทที่มั่นคงจ่ายเงินปันผลสม่ำเสมอ","หุ้นสามัญ XYZ ของบริษัทที่กำลังเติบโตสูง","หุ้นกู้ของบริษัทเอกชนที่มีอันดับความน่าเชื่อถือ BBB-","พันธบัตรรัฐบาลและตั๋วเงินคลัง"],answer:0},
-      {q:"Capital protection คืออะไร",choices:["ผู้ลงทุนต้องการให้สินทรัพย์หรือหลักทรัพย์ที่ลงทุนมีความปลอดภัย ไม่สูญหาย หรือมูลค่าไม่ลดลง","นักลงทุนต้องการให้เงินงอกเงย เน้นลงทุนหุ้นเป็นหลัก","นักลงทุนต้องการรายได้ประจำ ลงทุนในหุ้นปันผล","นักลงทุนต้องการผลตอบแทนรวม เน้นการทำ Asset allocation"],answer:0},
-      {q:"ผู้ลงทุนต้องการผลตอบแทนที่เทียบเท่ากับผลตอบแทนที่เกิดขึ้นในตลาดหลักทรัพย์ และยอมรับความเสี่ยงได้น้อย คือประเภทใด",choices:["Passive investor","Active investor","Aggressive investor","Reactive investor"],answer:0},
-      {q:"นาย ก. จะเปิดบัญชีลงทุน นาย ข. (IC) ขอข้อมูลระบุตัวตน แต่นาย ก. ไม่ยินยอม นาย ข. ควรปฏิบัติเช่นไร",choices:["ให้นาย ก. ทำแบบประเมินการยอมรับความเสี่ยงโดยละเอียด","อนุญาตให้นาย ก. ลงทุนได้เฉพาะสินทรัพย์ที่มีความเสี่ยงต่ำเท่านั้น","ให้นาย ก. เซ็นรับทราบว่าไม่ได้ส่งข้อมูลให้ผู้แนะนำการลงทุน","ปฏิเสธการให้บริการนาย ก."],answer:3},
-      {q:"ตัวเลือกใดไม่ใช่คุณสมบัติของผู้ลงทุนรายย่อยที่มีความเปราะบาง",choices:["มีความรู้ด้านการลงทุนจำกัด","มีภาระหนี้สินสูง","อายุ 60 ปีขึ้นไป","มีความบกพร่องทางสุขภาพ"],answer:1},
-      {q:"ตัวเลือกใดถูกต้องเกี่ยวกับการจัดการเรื่องข้อร้องเรียน\nI ลูกค้าติดต่อโดยตรง\nII หน่วยงานต้องเป็นอิสระ\nIII เมื่อแก้ไขเสร็จต้องแจ้งลูกค้าภายใน 3 วันทำการ",choices:["ข้อ I และ ข้อ II","ข้อ I และ ข้อ III","ข้อ II และ ข้อ III","ข้อ I ข้อ II และ ข้อ III"],answer:3},
-      {q:"นายเอสั่งซื้อหุ้น ABC นายบี (IC) เห็นว่านายเอเป็นรายใหญ่และจะทำให้ราคาหุ้นเพิ่มขึ้น จึงซื้อหุ้นให้ตัวเองก่อนแล้วค่อยซื้อให้นายเอ นายบีมีความผิดเรื่องใด",choices:["Churning","Front running","ไม่ส่งคำสั่งซื้อขายตามลำดับก่อนหลัง","ใช้บัญชีของลูกค้าซื้อขายหลักทรัพย์เพื่อตนเอง"],answer:1},
-      {q:"ตัวเลือกใดถูกต้องเกี่ยวกับขั้นตอนหลังการซื้อขาย\nI IC เก็บใบเสร็จให้ลูกค้า\nII ป้องกันพนักงานรับผิดชอบงานตั้งแต่ต้นจนจบ\nIII ฝ่ายปฏิบัติการทำหน้าที่โอนหลักทรัพย์",choices:["ข้อ I และข้อ II","ข้อ I และข้อ III","ข้อ II และข้อ III","ข้อ I ข้อ II และข้อ III"],answer:2},
-      {q:"ตัวเลือกใดถูกต้องเกี่ยวกับความขัดแย้งทางผลประโยชน์\nI ผู้ให้บริการคำนึงถึงประโยชน์ตนมากกว่าลูกค้า\nII บล. เป็นผู้จัดจำหน่าย PO ถือว่ามีความขัดแย้ง\nIII หากค่าธรรมเนียมไม่เท่ากันต้องเปิดเผยให้ลูกค้าทราบ",choices:["ข้อ I และข้อ II","ข้อ I และข้อ III","ข้อ II และข้อ III","ข้อ I ข้อ II และข้อ III"],answer:3},
-      {q:"ตัวเลือกใดถูกต้องเกี่ยวกับการดูแลรักษาทรัพย์สินลูกค้า\nI นำทรัพย์สินลูกค้ารวมกับบริษัทป้องกันการสูญหาย\nII สรุปยอดให้ลูกค้าทราบอย่างน้อยเดือนละ 1 ครั้ง\nIII ฝ่ายปฏิบัติการเป็นผู้รับผิดชอบดูแล",choices:["ข้อ I และข้อ II","ข้อ I และข้อ III","ข้อ II และข้อ III","ข้อ I ข้อ II และข้อ III"],answer:2},
-      {q:"ตัวเลือกใดเป็นหน้าที่ของหน่วยงาน Compliance\nI ลงโทษพนักงานที่ฝ่าฝืน\nII ดูแลทรัพย์สินลูกค้า\nIII อบรมให้ความรู้พนักงานเมื่อเกณฑ์ กลต. เปลี่ยนแปลง",choices:["ข้อ I และข้อ II","ข้อ I และข้อ III","ข้อ II และข้อ III","ข้อ I ข้อ II และข้อ III"],answer:1},
-      {q:"ตัวเลือกใดเป็นการกระทำที่ไม่ถูกต้องของ IC\nI ไม่ทำตามคำสั่งซื้อเพราะบัญชีลูกค้ายังไม่พร้อม\nII ส่งคำสั่งให้รายอื่นก่อนเพื่อนสนิทแม้เพื่อนจะส่งมาก่อน\nIII ขายหลักทรัพย์โดยไม่รอคำสั่งเพราะติดต่อลูกค้าไม่ได้และหุ้นกำลังตกหนัก",choices:["ข้อ I และข้อ II","ข้อ I และข้อ III","ข้อ II และข้อ III","ข้อ I ข้อ II และข้อ III"],answer:2},
-      {q:"บุตรของเจ้าของบัญชีสามารถส่งคำสั่งซื้อขายแทนเจ้าของบัญชีได้หรือไม่",choices:["ได้ เฉพาะบุตรที่บรรลุนิติภาวะแล้วเท่านั้น","ได้ เฉพาะบุตรที่ถูกต้องตามกฎหมาย","ได้ โดยเจ้าของบัญชีต้องทำหนังสือมอบอำนาจเป็นลายลักษณ์อักษรก่อน","ได้ โดยเจ้าของบัญชีต้องพาบุตรมาแนะนำให้รู้จักกับผู้แนะนำการลงทุนก่อน"],answer:2},
-      {q:"ตัวเลือกใดเป็นการกระทำที่ผู้แนะนำการลงทุนสามารถกระทำได้",choices:["ไม่เปิดเผยรายชื่อและบริษัทที่สังกัดให้ลูกค้าทราบ","บอกข่าวลือเฉพาะข่าวที่เกี่ยวข้องกับหลักทรัพย์ที่ลูกค้าลงทุน","ชำระค่าซื้อหลักทรัพย์แทนลูกค้า เนื่องจากลูกค้าประสบปัญหาทางเศรษฐกิจ","ปฏิเสธการขายหน่วยลงทุนที่มีความเสี่ยงสูงให้ลูกค้า"],answer:3},
-      {q:"ตัวเลือกใดเป็นการกระทำในลักษณะเอาเปรียบผู้ลงทุน\nI กระตุ้น ยุยง ให้ลูกค้าเทรดบ่อยๆ\nII ส่งคำสั่งให้รายใหญ่ก่อนรายอื่น\nIII ตัดสินใจซื้อขายแทนลูกค้า",choices:["ข้อ I และข้อ II","ข้อ I และข้อ III","ข้อ II และข้อ III","ข้อ I ข้อ II และข้อ III"],answer:3},
-      {q:"ข้อมูลใดที่ IC ต้องเปิดเผยหากมีการให้คำแนะนำที่มีความขัดแย้งทางผลประโยชน์\nI ผู้บริหาร บล. ถือหุ้นในบริษัทนั้นเกิน 5%\nII พนักงาน บล. เป็นกรรมการในบริษัทนั้น\nIII พนักงาน บล. เคยเป็นพนักงานที่นั่น",choices:["ข้อ I และข้อ II","ข้อ I และข้อ III","ข้อ II และข้อ III","ข้อ I ข้อ II และข้อ III"],answer:3},
-      {q:"ตัวเลือกใดเป็นการกระทำอันไม่เป็นธรรมเกี่ยวกับการซื้อขายหลักทรัพย์\nI ใช้ข้อมูลภายใน\nII ส่งข้อมูลลูกค้าให้เพื่อนต่างบริษัทโดยไม่ได้รับอนุญาต\nIII เผยแพร่ข่าวสารอันเป็นเท็จ",choices:["ข้อ I และข้อ II","ข้อ I และข้อ III","ข้อ II และข้อ III","ข้อ I ข้อ II และข้อ III"],answer:1},
-      {q:"นายแบงค์อายุ 45 ปี มีครอบครัว ถูกหวย 30 ล้านบาท ต้องการสร้างรายได้ประจำ หลักทรัพย์ใดไม่เหมาะ",choices:["พันธบัตรรัฐบาล","หุ้นกู้ระดับ AA+","เงินฝากประจำดอกเบี้ยพิเศษ","หุ้นสามัญประเภท growth stock"],answer:3},
-      {q:"พอร์ตการลงทุนใดเหมาะกับผู้ลงทุนที่รับความเสี่ยงได้ต่ำ",choices:["เงินฝาก 20% พันธบัตร 40% หุ้นสามัญ 40%","เงินฝาก 50% พันธบัตร 15% หุ้นสามัญ 35%","เงินฝาก 70% พันธบัตร 25% หุ้นสามัญ 5%","เงินฝาก 60% พันธบัตร 10% หุ้นสามัญ 30%"],answer:2},
-      {q:"ตัวเลือกใดถูกต้องเกี่ยวกับ Capital Appreciation",choices:["ไม่ต้องการขาดทุนจากการลงทุน","ต้องการรายได้ประจำจากการลงทุน","ปกป้องเงินต้นเป็นหลัก","เน้นลงทุนในหุ้นที่มีการเติบโตสูง"],answer:3}
-    ]
-  },
-  {
-    name: "ชุดที่ 4 — รวม 3 บทเรียน",
-    timed: true,
-    get questions(){
-      return shuffleArray([
-        ...SETS[0].questions,
-        ...SETS[1].questions,
-        ...SETS[2].questions
-      ]);
-    },
-    get totalQuestions(){
-      return SETS[0].questions.length + SETS[1].questions.length + SETS[2].questions.length;
-    }
-  }
+const LEVELS=[
+{
+  name:"เหมาะสม VS ไม่เหมาะสม",lesson:"แนวปฏิบัติในการขายและการให้บริการ",lessonOrder:1,sub:"แยกแยะพฤติกรรม · 90 วินาที",time:90,
+  desc:`<span style="font-weight:700;color:var(--black)">เหมาะสม VS ไม่เหมาะสม</span><br>
+<span style="color:var(--blue);font-weight:700">■ เหมาะสม</span> &nbsp;·&nbsp;
+<span style="color:#e63946;font-weight:700">■ ไม่เหมาะสม</span>`,
+  columns:["เหมาะสม","ไม่เหมาะสม"],
+  words:[
+    {text:"UHNW นิติบุคคล ยกเว้น\nKnowledge Assessment\nแต่ต้องแสดงเจตนาลายลักษณ์อักษร",col:0,
+     desc:"<b>เหมาะสม</b><br>ผู้ลงทุนรายใหญ่ที่เป็นนิติบุคคลและเป็น UHNW สามารถยกเว้นการทำ Knowledge Assessment ได้ แต่ต้องแสดงเจตนาเป็นลายลักษณ์อักษร"},
+    {text:"IC และ IP ดูแลลูกค้า\nอายุตั้งแต่ 60 ปี เป็นพิเศษ",col:0,
+     desc:"<b>เหมาะสม</b><br>ผู้ที่อายุตั้งแต่ 60 ปีขึ้นไปจัดเป็นกลุ่มเปราะบาง ควรได้รับการคุ้มครองและดูแลมากกว่าปกติ เช่นเดียวกับผู้พิการ และผู้มีความรู้ทางการเงินจำกัดหรือไม่มีประสบการณ์การลงทุน"},
+    {text:"บริษัทแยก\nFront office และ\nBack office",col:0,
+     desc:"<b>เหมาะสม</b><br>การแยก Front office และ Back office ป้องกันความขัดแย้งทางผลประโยชน์ และป้องกันการใช้ข้อมูลภายใน"},
+    {text:"ผู้แนะนำเก็บเอกสาร\nลูกค้าไว้กับตนเอง\nเพื่อความปลอดภัย",col:1,
+     desc:"<b>ไม่เหมาะสม</b><br>ผู้แนะนำการลงทุนไม่ควรเก็บเอกสารของลูกค้าไว้กับตนเอง เพราะอาจเกิดกรณีที่ผู้แนะนำการลงทุนปลอมแปลงเอกสารลูกค้าได้"},
+    {text:"กำหนดค่าตอบแทน\nแบบขายมากได้มาก",col:1,
+     desc:"<b>ไม่เหมาะสม</b><br>การจ่ายแบบขายมากได้มาก อาจทำให้เกิด product-focused และนำไปสู่ Mis-selling เนื่องจากผู้แนะนำจูงใจให้ขายมากกว่าดูแลประโยชน์ลูกค้า"},
+    {text:"ผู้แนะนำการลงทุน\nวางแผนการลงทุน\nให้ลูกค้า",col:1,
+     desc:"<b>ไม่เหมาะสม</b><br>ผู้แนะนำการลงทุนไม่มีสิทธิ์วางแผนการลงทุนให้ลูกค้า ผู้ที่สามารถวางแผนการลงทุนได้คือ นักวางแผนการลงทุน (Investment Planner) เท่านั้น"},
+  ]
+},{
+  name:"บทลงโทษทางปกครอง",lesson:"มาตรฐานการปฏิบัติงาน",lessonOrder:2,sub:"จับกลุ่ม 3 ระดับ · 90 วินาที",time:90,
+  desc:`<span style="font-weight:700;color:var(--black)">บทลงโทษทางปกครอง</span> มี 3 ระดับตามความร้ายแรง<br>
+<span style="color:var(--blue);font-weight:700">■ ระดับที่ 1</span> &nbsp;·&nbsp;
+<span style="color:#22a070;font-weight:700">■ ระดับที่ 2</span> &nbsp;·&nbsp;
+<span style="color:#cc00cc;font-weight:700">■ ระดับที่ 3</span><br>
+<span style="font-family:'Sarabun',sans-serif;font-size:.78rem;color:var(--muted)">Note: 1=ไม่มีผู้เสียหาย · 2=ลูกค้าเสียหาย · 3=ผิดกฎหมาย</span>`,
+  columns:["■ ระดับที่ 1","■ ระดับที่ 2","■ ระดับที่ 3"],
+  words:[
+    {text:"เปิดเผยพฤติกรรม\nที่ไม่เหมาะสม",col:0,
+     desc:"<b>ระดับที่ 1 — บทลงโทษ</b><br>ก.ล.ต. ประกาศชื่อและเปิดเผยพฤติกรรมที่ไม่เหมาะสมให้ประชาชนรับทราบ<br><br><b>ตัวอย่างความผิด:</b> วิเคราะห์ลูกค้าไม่รอบคอบ, สื่อสารไม่ชัดเจน, การันตีผลตอบแทน<br>ผิดจรรยาบรรณแต่ยังไม่ผิดกฎหมาย"},
+    {text:"ทำหน้าที่ต่อได้\nห้ามทำผิดซ้ำภายใน 1 ปี",col:0,
+     desc:"<b>ระดับที่ 1 — เงื่อนไข</b><br>ยังคงทำหน้าที่ต่อไปได้ตามปกติ แต่ต้องไม่กระทำความผิดในเรื่องเดิมซ้ำอีกภายใน 1 ปี"},
+    {text:"พักการให้\nความเห็นชอบ",col:1,
+     desc:"<b>ระดับที่ 2 — บทลงโทษ</b><br>ถูกพักการให้ความเห็นชอบตามความร้ายแรง<br><br><b>ตัวอย่างความผิด:</b> ขายแบบ Mis-selling, เปิดเผยข้อมูลลูกค้าจนเสียหาย, แอบอ้างใบอนุญาตที่ไม่มี"},
+    {text:"พักตั้งแต่ 1 เดือน\nถึง 2 ปี",col:1,
+     desc:"<b>ระดับที่ 2 — ระยะเวลา</b><br>ระยะเวลาพักการให้ความเห็นชอบตั้งแต่ 1 เดือน ถึง 2 ปี ตามที่คำสั่งพักกำหนด"},
+    {text:"เพิกถอนการให้\nความเห็นชอบ",col:2,
+     desc:"<b>ระดับที่ 3 — บทลงโทษ</b><br>ถูกเพิกถอนการให้ความเห็นชอบ ซึ่งเป็นโทษสูงสุด<br><br><b>ตัวอย่างความผิด:</b> ฉ้อโกง, ยักยอกเงินผู้ลงทุน, ปลอมแปลงเอกสาร, มีผู้เสียหายจำนวนมาก"},
+    {text:"เพิกถอนตั้งแต่ 1 ปี\nถึง 10 ปี",col:2,
+     desc:"<b>ระดับที่ 3 — ระยะเวลา</b><br>ระยะเวลาเพิกถอนการให้ความเห็นชอบตั้งแต่ 1 ถึง 10 ปี ความผิดระดับนี้มีความผิดทางกฎหมายร่วมด้วย"},
+  ]
+},{
+  name:"ตัวอย่างความผิด — บทลงโทษ",lesson:"มาตรฐานการปฏิบัติงาน",lessonOrder:2,sub:"จับกลุ่ม 3 ประเภท · 90 วินาที",time:90,
+  desc:`<span style="font-weight:700;color:var(--black)">ลากตัวอย่างความผิดไปใส่บทลงโทษที่ถูกต้อง</span><br>
+<span style="font-family:'Sarabun',sans-serif;font-size:.78rem;color:var(--muted)">Note: 1=ไม่มีผู้เสียหาย · 2=ลูกค้าเสียหาย · 3=ผิดกฎหมาย</span>`,
+  columns:["เปิดเผยพฤติกรรม\nที่ไม่เหมาะสม","พักการให้\nความเห็นชอบ","เพิกถอนการให้\nความเห็นชอบ"],
+  words:[
+    {text:"วิเคราะห์ลูกค้า\nไม่รอบคอบ",col:0,
+     desc:"<b>ระดับที่ 1</b><br>การวิเคราะห์ลูกค้าไม่รอบคอบทำให้บริษัทเสียชื่อ แต่ยังไม่มีผู้เสียหายโดยตรง บทลงโทษคือเปิดเผยพฤติกรรม"},
+    {text:"การันตี\nผลตอบแทน",col:0,
+     desc:"<b>ระดับที่ 1</b><br>การการันตีผลตอบแทนเป็นการให้ข้อมูลเท็จ ผิดจรรยาบรรณแต่ยังไม่ถึงขั้นทำให้ลูกค้าเสียทรัพย์จริง"},
+    {text:"ขายแบบ\nMis-selling",col:1,
+     desc:"<b>ระดับที่ 2</b><br>การขายแบบ Mis-selling ทำให้ลูกค้าซื้อผลิตภัณฑ์ที่ไม่เหมาะสม เกิดความเสียหายโดยตรง"},
+    {text:"แอบอ้างใบอนุญาต\nที่ไม่มี",col:1,
+     desc:"<b>ระดับที่ 2</b><br>การแอบอ้างใบอนุญาตที่ไม่มี เช่น เพื่อเสนอขายตราสารซับซ้อน เข้าข่าย Misrepresentation (การให้ข้อมูลเท็จ) ซึ่งเป็นรูปแบบหนึ่งของ Mis-selling ที่รุนแรง"},
+    {text:"ฉ้อโกง /\nยักยอกเงิน",col:2,
+     desc:"<b>ระดับที่ 3</b><br>การฉ้อโกงหรือยักยอกเงินผู้ลงทุนเป็นความผิดทางกฎหมาย โทษสูงสุดคือเพิกถอนการให้ความเห็นชอบ"},
+    {text:"ปลอมแปลงเอกสาร",col:2,
+     desc:"<b>ระดับที่ 3</b><br>การปลอมแปลงเอกสารเป็นความผิดทางอาญาตามกฎหมาย บทลงโทษทางปกครอง คือเพิกถอนสูงสุด 1-10 ปี"},
+  ]
+},{
+  name:"การสร้างและบริหารกลุ่มหลักทรัพย์",lesson:"การให้คำแนะนำการลงทุนที่เหมาะสม",lessonOrder:3,sub:"จับกลุ่ม 2 ประเภท · 90 วินาที",time:90,
+  desc:`<span style="font-weight:700;color:var(--black)">การสร้างและบริหารกลุ่มหลักทรัพย์</span><br>
+<span style="color:var(--blue);font-weight:700">■ การสร้างกลุ่มหลักทรัพย์</span> &nbsp;·&nbsp;
+<span style="color:#22a070;font-weight:700">■ การบริหารกลุ่มหลักทรัพย์</span>`,
+  columns:["การสร้างกลุ่ม\nหลักทรัพย์ลงทุน","การบริหารกลุ่ม\nหลักทรัพย์"],
+  words:[
+    {text:"การแบ่งกลุ่มย่อย\n(Sub-class)",col:0,
+     desc:"<b>การแบ่งกลุ่มย่อย (Sub-class)</b><br>การจัดแบ่งสินทรัพย์ออกเป็นกลุ่มย่อยตามลักษณะและความเสี่ยง เพื่อการกระจายการลงทุนที่มีประสิทธิภาพ"},
+    {text:"การคัดเลือกหลักทรัพย์\n(Securities Selection)",col:0,
+     desc:"<b>การคัดเลือกหลักทรัพย์ (Securities Selection)</b><br>กระบวนการเลือกหลักทรัพย์ที่เหมาะสมเพื่อนำเข้ากลุ่มการลงทุน โดยพิจารณาจากปัจจัยต่างๆ"},
+    {text:"วิเคราะห์\nปัจจัยพื้นฐาน",col:0,
+     desc:"<b>วิเคราะห์ปัจจัยพื้นฐาน</b><br>การวิเคราะห์มูลค่าที่แท้จริงของหลักทรัพย์จากข้อมูลทางการเงิน เศรษฐกิจ และธุรกิจของบริษัท"},
+    {text:"วิเคราะห์\nปัจจัยทางเทคนิค",col:0,
+     desc:"<b>วิเคราะห์ปัจจัยทางเทคนิค</b><br>การวิเคราะห์แนวโน้มราคาและปริมาณการซื้อขายจากกราฟและสถิติในอดีต เพื่อคาดการณ์ทิศทางราคา"},
+    {text:"วิเคราะห์การเงิน\nเชิงพฤติกรรม",col:0,
+     desc:"<b>วิเคราะห์การเงินเชิงพฤติกรรม</b><br>การศึกษาผลกระทบของจิตวิทยาและอารมณ์ของนักลงทุนต่อการตัดสินใจและราคาตลาด"},
+    {text:"การบริหารเชิงรุก\n(Active Management)",col:1,
+     desc:"<b>การบริหารเชิงรุก (Active Portfolio Management)</b><br>พยายามสร้างอัตราผลตอบแทนมากกว่าตลาด โดยการเลือกหลักทรัพย์และจังหวะการลงทุนอย่างแข็งขัน"},
+    {text:"พยายามสร้างผลตอบแทน\nมากกว่าตลาด",col:1,
+     desc:"<b>เป้าหมายของ Active Management</b><br>มุ่งสร้างผลตอบแทนส่วนเกิน (Alpha) เหนือกว่าดัชนีอ้างอิง แลกกับต้นทุนการบริหารที่สูงกว่า"},
+    {text:"การบริหารเชิงรับ\n(Passive Management)",col:1,
+     desc:"<b>การบริหารเชิงรับ (Passive Portfolio Management)</b><br>พยายามสร้างอัตราผลตอบแทนให้เท่ากับหรือใกล้เคียงตลาด เช่น การลงทุนใน Index Fund"},
+    {text:"พยายามสร้างผลตอบแทน\nเท่ากับหรือใกล้เคียงตลาด",col:1,
+     desc:"<b>เป้าหมายของ Passive Management</b><br>ติดตามดัชนีอ้างอิง (Benchmark) โดยมีต้นทุนต่ำกว่า Active Management เหมาะกับตลาดที่มีประสิทธิภาพสูง"},
+  ]
+},{
+  name:"ประเภทผู้ลงทุน — รายย่อย VS รายใหญ่",lesson:"แนวปฏิบัติในการขายและการให้บริการ",lessonOrder:1,sub:"แยกประเภทผู้ลงทุน · 90 วินาที",time:90,
+  desc:`<span style="font-weight:700;color:var(--black)">ประเภทผู้ลงทุน</span><br>
+<span style="color:var(--blue);font-weight:700">■ รายย่อย (Retail)</span> &nbsp;·&nbsp;
+<span style="color:#22a070;font-weight:700">■ รายใหญ่ (Accredited)</span><br>
+<span style="font-family:'Sarabun',sans-serif;font-size:.78rem;color:var(--muted)">Note: รายใหญ่ได้รับความคุ้มครองน้อยกว่า แต่ลงทุนได้กว้างกว่า</span>`,
+  columns:["รายย่อย\n(Retail Investor)","รายใหญ่\n(Accredited Investor)"],
+  words:[
+    {text:"ต้องผ่าน\nKnowledge Assessment",col:0,
+     desc:"<b>Retail Investor</b><br>ผู้ลงทุนรายย่อยต้องผ่านการทดสอบความรู้ (Knowledge Assessment) ก่อนลงทุนในผลิตภัณฑ์ที่ซับซ้อน เพื่อปกป้องผู้ลงทุนจากความเสี่ยงที่ไม่เข้าใจ"},
+    {text:"ได้รับความคุ้มครอง\nสูงสุด",col:0,
+     desc:"<b>Retail Investor</b><br>ผู้ลงทุนรายย่อยได้รับการคุ้มครองสูงที่สุด เนื่องจากอาจขาดความรู้และประสบการณ์การลงทุน กฎหมายจึงกำหนดมาตรการปกป้องไว้เข้มงวด"},
+    {text:"ต้องทำ Suitability\nทุกครั้ง",col:0,
+     desc:"<b>Retail Investor</b><br>ผู้แนะนำต้องตรวจสอบความเหมาะสม (Suitability) ก่อนแนะนำผลิตภัณฑ์ทุกครั้ง เพื่อให้แน่ใจว่าผลิตภัณฑ์เหมาะสมกับสถานะและเป้าหมายของลูกค้า"},
+    {text:"สินทรัพย์สุทธิ\n> 50 ล้านบาท",col:1,
+     desc:"<b>Accredited Investor — เกณฑ์รายบุคคล</b><br>บุคคลธรรมดาที่มีสินทรัพย์สุทธิ (หักหนี้แล้ว) มากกว่า 50 ล้านบาท จัดเป็นผู้ลงทุนรายใหญ่ และได้รับการยกเว้นข้อกำหนดบางประการ"},
+    {text:"รายได้ต่อปี\n> 4 ล้านบาท",col:1,
+     desc:"<b>Accredited Investor — เกณฑ์รายได้</b><br>บุคคลธรรมดาที่มีรายได้ต่อปีมากกว่า 4 ล้านบาท ถือเป็นผู้ลงทุนรายใหญ่ โดยสามารถลงทุนในผลิตภัณฑ์ที่หลากหลายกว่า"},
+    {text:"ยกเว้น Knowledge\nAssessment ได้",col:1,
+     desc:"<b>Accredited Investor</b><br>ผู้ลงทุนรายใหญ่ประเภท UHNW หรือนิติบุคคล สามารถยกเว้นการทำ Knowledge Assessment ได้ แต่ต้องแสดงเจตนาเป็นลายลักษณ์อักษร"},
+  ]
+},{
+  name:"คุณสมบัติลูกค้ากลุ่มเปราะบาง",lesson:"แนวปฏิบัติในการขายและการให้บริการ",lessonOrder:1,sub:"แยกกลุ่มเปราะบาง VS ไม่ใช่ · 90 วินาที",time:90,
+  desc:`<span style="font-weight:700;color:var(--black)">คุณสมบัติลูกค้ากลุ่มเปราะบาง</span><br>
+<span style="color:var(--blue);font-weight:700">■ กลุ่มเปราะบาง</span> &nbsp;·&nbsp;
+<span style="color:#e63946;font-weight:700">■ ไม่ใช่กลุ่มเปราะบาง</span><br>
+<span style="font-family:'Sarabun',sans-serif;font-size:.78rem;color:var(--muted)">คุณสมบัติกลุ่มเปราะบาง: อายุ 60+ / ไม่มีประสบการณ์ลงทุน / ความรู้การเงินจำกัด / มีข้อจำกัดด้านการสื่อสาร (มองเห็น/ได้ยิน) — ยึดตามหนังสือเป็นหลัก</span>`,
+  columns:["ลูกค้ากลุ่มเปราะบาง","ไม่ใช่กลุ่มเปราะบาง"],
+  words:[
+    {text:"อายุ 60 ปี ขึ้นไป",col:0,
+     desc:"<b>กลุ่มเปราะบาง</b><br>ผู้ที่มีอายุตั้งแต่ 60 ปีขึ้นไป จัดอยู่ในกลุ่มเปราะบาง ต้องได้รับการดูแลและคุ้มครองเป็นพิเศษจาก IC และ IP"},
+    {text:"ไม่มีประสบการณ์\nด้านลงทุน",col:0,
+     desc:"<b>กลุ่มเปราะบาง</b><br>ผู้ที่ไม่มีประสบการณ์ลงทุนมาก่อน อาจไม่เข้าใจความเสี่ยงและลักษณะของผลิตภัณฑ์ จึงจัดเป็นกลุ่มเปราะบางที่ต้องได้รับการดูแลพิเศษ"},
+    {text:"มีความรู้ด้านการเงิน\nการลงทุนอย่างจำกัด",col:0,
+     desc:"<b>กลุ่มเปราะบาง</b><br>ผู้ที่มีความรู้ด้านการเงินและการลงทุนอย่างจำกัด อาจตัดสินใจโดยขาดข้อมูล จึงจัดเป็นกลุ่มเปราะบางที่ต้องระมัดระวังในการให้คำแนะนำ"},
+    {text:"มีข้อจำกัด\nด้านการมองเห็น",col:0,
+     desc:"<b>กลุ่มเปราะบาง</b><br>ผู้ที่มีข้อจำกัดด้านการสื่อสาร เช่น การมองเห็น หรือการได้ยิน จัดเป็นกลุ่มเปราะบาง เนื่องจากอาจรับข้อมูลและเงื่อนไขการลงทุนได้ไม่ครบถ้วน"},
+    {text:"อายุ 55 ปี\nและใกล้เกษียณ",col:1,
+     desc:"<b>ไม่ใช่กลุ่มเปราะบาง</b><br>เกณฑ์อายุของกลุ่มเปราะบางคือ 60 ปีขึ้นไป อายุ 55 ปีจึงยังไม่เข้าเกณฑ์ แม้จะใกล้เกษียณก็ตาม — ในการสอบมักยึดตามหนังสือเป็นหลัก"},
+    {text:"มีหนี้สิน\nจำนวนมาก",col:1,
+     desc:"<b>ไม่ใช่กลุ่มเปราะบาง</b><br>การมีหนี้สินจำนวนมากเป็นเรื่องของสถานะทางการเงิน ไม่ใช่คุณสมบัติของกลุ่มเปราะบางตามนิยามในหนังสือ"},
+    {text:"เพิ่งตกงาน",col:1,
+     desc:"<b>ไม่ใช่กลุ่มเปราะบาง</b><br>การตกงานเป็นสถานการณ์ชั่วคราว ไม่ใช่คุณสมบัติที่ทำให้จัดอยู่ในกลุ่มเปราะบางตามนิยามในหนังสือ"},
+    {text:"มูลค่าพอร์ตลงทุน\nติดลบเกิน 80%",col:1,
+     desc:"<b>ไม่ใช่กลุ่มเปราะบาง</b><br>ผลขาดทุนในพอร์ตการลงทุนไม่ได้จัดเป็นคุณสมบัติของกลุ่มเปราะบาง กลุ่มเปราะบางพิจารณาจากอายุ ประสบการณ์ ความรู้ และข้อจำกัดการสื่อสารเท่านั้น"},
+  ]
+},{
+  name:"Watch list VS Restricted list",lesson:"แนวปฏิบัติในการขายและการให้บริการ",lessonOrder:1,sub:"แยกข้อปฏิบัติ 2 บัญชี · 90 วินาที",time:90,
+  desc:`<span style="font-weight:700;color:var(--black)">Watch list VS Restricted list</span><br>
+<span style="color:var(--blue);font-weight:700">■ Watch list (W/L)</span> &nbsp;·&nbsp;
+<span style="color:#22a070;font-weight:700">■ Restricted list (R/L)</span><br>
+<span style="font-family:'Sarabun',sans-serif;font-size:.78rem;color:var(--muted)">W/L = deal ยังไม่เปิดเผย · R/L = เปิดเผยต่อสาธารณะแล้ว</span>`,
+  columns:["Watch list\n(W/L)","Restricted list\n(R/L)"],
+  words:[
+    {text:"deal ยังไม่เปิดเผย\nแก่สาธารณชน",col:0,
+     desc:"<b>Watch list</b><br>เงื่อนไขการเข้า W/L คือความสัมพันธ์หรือ deal ยังไม่เปิดเผยต่อสาธารณชน รู้ได้เฉพาะหน่วยงานและพนักงานที่ปฏิบัติหน้าที่ที่เกี่ยวข้องเท่านั้น"},
+    {text:"รู้ได้เฉพาะพนักงาน\nที่เกี่ยวข้องเท่านั้น",col:0,
+     desc:"<b>Watch list</b><br>ข้อมูลใน W/L จำกัดเฉพาะหน่วยงานและพนักงานที่ปฏิบัติหน้าที่เกี่ยวข้องโดยตรง ไม่เปิดเผยในวงกว้าง"},
+    {text:"ห้ามพนักงาน\nที่เกี่ยวข้องซื้อหรือขาย\nหลักทรัพย์",col:0,
+     desc:"<b>Watch list</b><br>ห้ามเฉพาะพนักงานที่เกี่ยวข้องซื้อหรือขายหลักทรัพย์ในบัญชี W/L ทั้งเพื่อตนเองและลูกค้า"},
+    {text:"บล. เปิดเผยความสัมพันธ์\nรายชื่อหลักทรัพย์\nแก่สาธารณชนแล้ว",col:1,
+     desc:"<b>Restricted list</b><br>เงื่อนไขการเข้า R/L คือ บล. เปิดเผยความสัมพันธ์รายชื่อหลักทรัพย์ต่อสาธารณชนแล้ว พนักงานทุกคนจึงได้รับทราบ"},
+    {text:"ห้ามพนักงาน\nทุกคนซื้อหรือขาย\nเพื่อตนเอง",col:1,
+     desc:"<b>Restricted list</b><br>ห้ามพนักงานทุกคน (ไม่ใช่เฉพาะที่เกี่ยวข้อง) ซื้อหรือขายหลักทรัพย์เพื่อประโยชน์ส่วนตน"},
+    {text:"ห้ามบริษัทซื้อหรือขาย\nหลักทรัพย์เพื่อบริษัท",col:1,
+     desc:"<b>Restricted list</b><br>นอกจากห้ามพนักงานแล้ว ยังห้ามบริษัทดำเนินการซื้อหรือขายหลักทรัพย์นั้นเพื่อประโยชน์ของบริษัทเองด้วย"},
+    {text:"ห้ามชักชวน\nและให้คำแนะนำ",col:1,
+     desc:"<b>Restricted list</b><br>ห้ามพนักงานชักชวนลูกค้าหรือให้คำแนะนำเกี่ยวกับหลักทรัพย์ที่อยู่ใน R/L ไม่ว่าในกรณีใด"},
+    {text:"ห้ามออก\nบทวิเคราะห์",col:1,
+     desc:"<b>Restricted list</b><br>ห้ามออกบทวิเคราะห์หลักทรัพย์ที่อยู่ใน R/L เพื่อป้องกันการใช้ประโยชน์จากข้อมูลภายในในรูปแบบการวิเคราะห์"},
+  ]
+},{
+  name:"กระบวนการร้องเรียน — ลำดับขั้นตอน",lesson:"มาตรฐานการปฏิบัติงาน",lessonOrder:2,sub:"เรียงลำดับขั้นตอน · 90 วินาที",time:90,
+  desc:`<span style="font-weight:700;color:var(--black)">กระบวนการร้องเรียนและระงับข้อพิพาท</span><br>
+<span style="color:var(--blue);font-weight:700">■ ภายในบริษัท</span> &nbsp;·&nbsp;
+<span style="color:#22a070;font-weight:700">■ หน่วยงานภายนอก</span><br>
+<span style="font-family:'Sarabun',sans-serif;font-size:.78rem;color:var(--muted)">Note: เริ่มจากภายในก่อน แล้วค่อยไปภายนอก</span>`,
+  columns:["ระงับข้อพิพาท\nภายในบริษัท","ยกระดับสู่\nหน่วยงานภายนอก"],
+  words:[
+    {text:"แจ้งผู้แนะนำ\nการลงทุนโดยตรง",col:0,
+     desc:"<b>ขั้นตอนแรก — ภายในบริษัท</b><br>ลูกค้าควรแจ้งปัญหาหรือข้อร้องเรียนให้ผู้แนะนำการลงทุนที่ดูแลรับทราบก่อนเป็นอันดับแรก"},
+    {text:"ยื่นเรื่องที่\nฝ่ายลูกค้าสัมพันธ์",col:0,
+     desc:"<b>ขั้นตอนที่สอง — ภายในบริษัท</b><br>หากไม่ได้รับการแก้ไข ลูกค้าสามารถยื่นเรื่องอย่างเป็นทางการที่ฝ่ายลูกค้าสัมพันธ์ (Customer Service) ของบริษัท"},
+    {text:"ร้องเรียนผ่าน\nสมาคม บล. / บลจ.",col:0,
+     desc:"<b>ภายในอุตสาหกรรม</b><br>สมาคมบริษัทหลักทรัพย์ (บล.) หรือสมาคมบริษัทจัดการลงทุน (บลจ.) มีช่องทางรับเรื่องร้องเรียนและไกล่เกลี่ยข้อพิพาทในอุตสาหกรรม"},
+    {text:"ร้องเรียน\nต่อ ก.ล.ต.",col:1,
+     desc:"<b>หน่วยงานกำกับดูแล</b><br>ก.ล.ต. (สำนักงานคณะกรรมการกำกับหลักทรัพย์และตลาดหลักทรัพย์) รับเรื่องร้องเรียนเกี่ยวกับการกระทำผิดกฎหมายหลักทรัพย์"},
+    {text:"ร้องเรียน\nต่อ ศคง.",col:1,
+     desc:"<b>ศูนย์คุ้มครองผู้ใช้บริการทางการเงิน (ศคง.)</b><br>หน่วยงานภายใต้ ธนาคารแห่งประเทศไทย รับเรื่องร้องเรียนด้านการเงินของผู้บริโภค"},
+    {text:"ฟ้องร้องทาง\nศาล / อนุญาโตตุลาการ",col:1,
+     desc:"<b>กระบวนการทางกฎหมาย</b><br>หากทุกช่องทางไม่เป็นผล ลูกค้ามีสิทธิ์ฟ้องร้องต่อศาลหรือใช้กระบวนการอนุญาโตตุลาการเพื่อระงับข้อพิพาท"},
+  ]
+},{
+  name:"Risk Profile — ประเภทความเสี่ยง",lesson:"การให้คำแนะนำการลงทุนที่เหมาะสม",lessonOrder:3,sub:"จับกลุ่ม 3 ประเภท · 90 วินาที",time:90,
+  desc:`<span style="font-weight:700;color:var(--black)">ระดับความเสี่ยงที่ยอมรับได้</span><br>
+<span style="color:var(--blue);font-weight:700">■ ความเสี่ยงต่ำ</span> &nbsp;·&nbsp;
+<span style="color:#22a070;font-weight:700">■ ความเสี่ยงปานกลาง</span> &nbsp;·&nbsp;
+<span style="color:#cc00cc;font-weight:700">■ ความเสี่ยงสูง</span><br>
+<span style="font-family:'Sarabun',sans-serif;font-size:.78rem;color:var(--muted)">ลากสินทรัพย์ไปใส่ระดับความเสี่ยงที่เหมาะสม</span>`,
+  columns:["ความเสี่ยงต่ำ\n(Conservative)","ความเสี่ยงปานกลาง\n(Moderate)","ความเสี่ยงสูง\n(Aggressive)"],
+  words:[
+    {text:"พันธบัตรรัฐบาล\nระยะสั้น",col:0,
+     desc:"<b>ความเสี่ยงต่ำ</b><br>พันธบัตรรัฐบาลมีความเสี่ยงต่ำที่สุด เนื่องจากรัฐบาลเป็นผู้ออกและค้ำประกัน โอกาสผิดนัดชำระหนี้แทบเป็นศูนย์"},
+    {text:"เงินฝากประจำ\n/ ตั๋วเงินคลัง",col:0,
+     desc:"<b>ความเสี่ยงต่ำ</b><br>เงินฝากประจำได้รับการคุ้มครองจากสถาบันคุ้มครองเงินฝาก (สคฝ.) และให้ผลตอบแทนแน่นอน เหมาะกับผู้ที่รับความเสี่ยงได้น้อย"},
+    {text:"กองทุนรวม\nตราสารหนี้",col:1,
+     desc:"<b>ความเสี่ยงปานกลาง</b><br>กองทุนตราสารหนี้ลงทุนในหุ้นกู้และพันธบัตร มีความผันผวนมากกว่าเงินฝาก แต่น้อยกว่าหุ้น เหมาะกับผู้ต้องการผลตอบแทนสม่ำเสมอ"},
+    {text:"กองทุนรวม\nผสม (Balanced Fund)",col:1,
+     desc:"<b>ความเสี่ยงปานกลาง</b><br>Balanced Fund ลงทุนทั้งหุ้นและตราสารหนี้ในสัดส่วนที่กำหนด ช่วยกระจายความเสี่ยงและให้ผลตอบแทนสมดุล"},
+    {text:"หุ้นสามัญ\n(Common Stock)",col:2,
+     desc:"<b>ความเสี่ยงสูง</b><br>การลงทุนในหุ้นมีความผันผวนสูง ราคาอาจขึ้นลงมากตามสภาพตลาดและผลประกอบการของบริษัท แต่มีโอกาสสร้างผลตอบแทนสูงในระยะยาว"},
+    {text:"กองทุนรวม\nหุ้น / ETF",col:2,
+     desc:"<b>ความเสี่ยงสูง</b><br>กองทุนหุ้นและ ETF ลงทุนในตลาดหุ้นเป็นหลัก มีความผันผวนสูงตามตลาด เหมาะกับผู้ที่รับความเสี่ยงได้สูงและมีระยะเวลาลงทุนยาว"},
+  ]
+}
 ];
 
-// ===== STATE =====
-let curSet = 0;
-let curQ = 0;
-let userAnswers = [];
-let shuffledOrders = [];
-let totalQ = 0;
-let timerInt = null;
-let timeLeft = 0;
-let isTimed = false;
+let curLvl=0,timerInt=null,timeLeft=90,startTime=null,elapsed=0;
+let score=0,correct=0,total=0,answers=[];
+let wordEls={},placed={};
+let dragIdx=null,dragEl=null,ghost=null;
 
-function showScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo(0,0);
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0)}
+function goHome(){clearInterval(timerInt);showScreen('home-screen');updateHomeCountdown()}
+function goToComingSoon(name){
+  document.getElementById('cs-title-text').textContent=name;
+  showScreen('coming-soon-screen');
 }
-function goHome(){
-  clearInterval(timerInt);
-  showScreen('home-screen');
-  updateMockCountdown();
-}
+function goToCalendar(){showScreen('calendar-screen');renderCalCountdown();var saved=localStorage.getItem(EXAM_KEY);var el=document.getElementById('exam-date-input');if(el&&saved)el.value=saved;}
 
-function fmtTime(s){
-  var m = Math.floor(s/60);
-  var sec = s%60;
-  return (m<10?'0':'')+m+':'+(sec<10?'0':'')+sec;
-}
-
-function tickTimer(){
-  timeLeft--;
-  document.getElementById('timer-val').textContent = fmtTime(timeLeft);
-  if(timeLeft <= 60) document.getElementById('timer-box').classList.add('urgent');
-  if(timeLeft <= 0){
-    clearInterval(timerInt);
-    showResult();
-  }
-}
-
-function startTimer(totalSecs){
-  timeLeft = totalSecs;
-  document.getElementById('timer-val').textContent = fmtTime(timeLeft);
-  document.getElementById('timer-box').classList.remove('urgent');
-  document.getElementById('timer-box').style.display = '';
-  clearInterval(timerInt);
-  timerInt = setInterval(tickTimer, 1000);
-}
-
-// ===== RENDER HOME =====
-function renderHome(){
-  const list = document.getElementById('set-list');
-  list.innerHTML = '';
-  SETS.forEach((set, i) => {
-    const d = document.createElement('div');
-    d.className = 'quiz-set-card';
-    d.onclick = () => startQuiz(i);
-    const badgeColor = i === 3 ? 'var(--pink)' : 'rgb(237,255,40)';
-    d.innerHTML = `
-      <div class="qsc-label">${set.name}</div>
-      <div class="qsc-meta">${set.totalQuestions || set.questions.length} ข้อ · สลับตัวเลือกทุกรอบ</div>
-      <div class="qsc-badge" style="background:${badgeColor};color:var(--black)">เริ่มทำข้อสอบ →</div>
-      <div class="qsc-arrow">›</div>`;
-    list.appendChild(d);
-  });
-}
-
-// ===== SHUFFLE helper =====
-function shuffleArray(arr){
-  const a = [...arr];
-  for(let i = a.length-1; i > 0; i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i],a[j]] = [a[j],a[i]];
-  }
-  return a;
-}
-
-// ===== START QUIZ =====
-function startQuiz(setIdx){
-  clearInterval(timerInt);
-  curSet = setIdx;
-  curQ = 0;
-  const set = SETS[setIdx];
-  isTimed = !!set.timed;
-
-  // For set 4: get shuffled combined questions
-  const qs = set.questions;
-  totalQ = qs.length;
-  userAnswers = new Array(totalQ).fill(null);
-
-  // Store resolved questions for timed set (getter returns new array each call)
-  if(isTimed) SETS[setIdx]._resolved = qs;
-
-  shuffledOrders = qs.map(q =>
-    shuffleArray(q.choices.map((_,i)=>i))
-  );
-
-  document.getElementById('quiz-set-title').textContent = set.name;
-  document.getElementById('quiz-set-sub').textContent = totalQ + ' ข้อ · เฉลยหลังทำครบ';
-
-  // Timer
-  if(isTimed){
-    startTimer(totalQ * 100);
+function toggleScheduleSection(){
+  var s = document.getElementById('schedule-section');
+  if(!s) return;
+  var isHidden = s.style.display === 'none' || s.style.display === '';
+  if(isHidden){
+    s.style.display = 'block';
+    setTimeout(function(){
+      s.scrollIntoView({behavior:'smooth', block:'start'});
+    }, 50);
   } else {
-    clearInterval(timerInt);
-    document.getElementById('timer-box').style.display = 'none';
-  }
-
-  showScreen('quiz-screen');
-  renderQuestion();
-}
-
-// ===== RENDER QUESTION =====
-function getQuestions(){
-  const set = SETS[curSet];
-  return set._resolved || set.questions;
-}
-
-function renderGrid(){
-  const grid = document.getElementById('q-grid');
-  if(!grid) return;
-  grid.innerHTML = '';
-  for(let i = 0; i < totalQ; i++){
-    const cell = document.createElement('div');
-    cell.className = 'q-cell' +
-      (userAnswers[i] !== null ? ' answered' : '') +
-      (i === curQ ? ' current' : '');
-    cell.textContent = i + 1;
-    cell.onclick = (function(idx){ return function(){
-      curQ = idx;
-      closeGridModal();
-      renderQuestion();
-    }; })(i);
-    grid.appendChild(cell);
+    s.style.display = 'none';
   }
 }
-function openGridModal(){ renderGrid(); document.getElementById('grid-modal').classList.add('open'); }
-function closeGridModal(){ document.getElementById('grid-modal').classList.remove('open'); }
-function closeGridModalOuter(e){ if(e.target===document.getElementById('grid-modal')) closeGridModal(); }
 
-function renderQuestion(){
-  const qs = getQuestions();
-  const q = qs[curQ];
-  const order = shuffledOrders[curQ];
+function toggleAccordion(id){
+  var body = document.getElementById('body-'+id);
+  var arrow = document.getElementById('arrow-'+id);
+  if(!body) return;
+  var isOpen = body.classList.contains('open');
+  // close all
+  document.querySelectorAll('.sch-body').forEach(function(b){b.classList.remove('open')});
+  document.querySelectorAll('.sch-arrow').forEach(function(a){a.classList.remove('open')});
+  // open clicked if was closed
+  if(!isOpen){
+    body.classList.add('open');
+    arrow.classList.add('open');
+  }
+}
 
-  // Counter — show answered/total
-  const answeredCount = userAnswers.filter(a => a !== null).length;
-  const allAnswered = answeredCount === totalQ;
-  document.getElementById('q-counter-val').textContent = allAnswered ? 'ส่งคำตอบ' : `${answeredCount}/${totalQ}`;
-  document.getElementById('q-counter-lbl').textContent = allAnswered ? '' : 'ตอบแล้ว';
-  document.getElementById('q-counter').style.background = allAnswered ? 'var(--green)' : 'var(--yellow)';
-  document.getElementById('q-counter').style.cursor = allAnswered ? 'pointer' : 'default';
-  document.getElementById('q-counter').onclick = allAnswered ? showResult : null;
+const EXAM_KEY='cfp_exam_date';
+function saveExamDate(){
+  var val=document.getElementById('exam-date-input').value;
+  if(!val)return;
+  localStorage.setItem(EXAM_KEY,val);
+  renderCalCountdown();updateHomeCountdown();
+}
+function clearExamDate(){
+  localStorage.removeItem(EXAM_KEY);
+  var el=document.getElementById('exam-date-input');
+  if(el)el.value='';
+  renderCalCountdown();updateHomeCountdown();
+}
+function getCountdownData(){
+  var saved=localStorage.getItem(EXAM_KEY);
+  if(!saved)return null;
+  var exam=new Date(saved+'T00:00:00');
+  var now=new Date();now.setHours(0,0,0,0);
+  var diffMs=exam-now;
+  var days=Math.ceil(diffMs/(1000*60*60*24));
+  return{days:days,hours:days*24,dateStr:saved};
+}
+function renderCalCountdown(){
+  var box=document.getElementById('cal-countdown-box');
+  var input=document.getElementById('exam-date-input');
+  var data=getCountdownData();
+  if(!data){
+    box.className='countdown-display empty';
+    box.innerHTML='<div class="cd-empty-text">ยังไม่ได้ตั้งวันสอบ<br>เลือกวันด้านล่างได้เลย</div>';
+    return;
+  }
+  input.value=data.dateStr;
+  box.className='countdown-display';
+  if(data.days<0){
+    box.innerHTML='<div class="cd-days">หมดเวลา</div><div class="cd-label">ผ่านวันสอบไปแล้ว</div>';
+  } else if(data.days===0){
+    box.innerHTML='<div class="cd-days">วันนี้!</div><div class="cd-label">โชคดีนะ!</div>';
+  } else {
+    box.innerHTML='<div class="cd-days">'+data.days+'</div><div class="cd-label">วันที่เหลือก่อนสอบ</div><div class="cd-hours">('+data.hours.toLocaleString()+' ชั่วโมง)</div>';
+  }
+}
+function updateHomeCountdown(){
+  var el=document.getElementById('home-countdown');if(!el)return;
+  var data=getCountdownData();
+  if(!data){el.innerHTML='ปฏิทินสอบ';return;}
+  if(data.days<0){
+    el.innerHTML='ปฏิทินสอบ<br><span style="font-size:.85rem">หมดเวลาแล้ว</span>';
+  } else if(data.days===0){
+    el.innerHTML='วันสอบ<br><span style="font-size:1.1rem;font-weight:800">วันนี้! 🎯</span>';
+  } else {
+    el.innerHTML='เหลืออีก<br><span style="font-size:1.2rem;font-weight:800">'+data.days+' วัน</span><br><span style="font-size:.72rem;opacity:.85">('+data.hours.toLocaleString()+' ชั่วโมง)</span>';
+  }
+}
+// load handler moved above
+function goToLevelSelect(){showScreen('level-screen');renderLevelList()}
 
-  // Progress
-  document.getElementById('progress-bar').style.width = ((answeredCount)/totalQ*100) + '%';
-
-  // Prev button
-  document.getElementById('btn-prev').style.display = curQ === 0 ? 'none' : '';
-
-  // Next button — always navigate, submit via counter badge
-  const btnNext = document.getElementById('btn-next');
-  btnNext.className = 'btn-next';
-  btnNext.textContent = 'ถัดไป →';
-  btnNext.onclick = nextQ;
-
-  // Body
-  const body = document.getElementById('quiz-body');
-  body.innerHTML = '';
-
-  // Question text
-  const qWrap = document.createElement('div');
-  qWrap.className = 'q-text-wrap';
-  const qHtml = q.q.replace(/\n/g, '<br>');
-  qWrap.innerHTML = `
-    <div class="q-number-badge">${curQ+1}</div>
-    <div class="q-text">${qHtml}</div>`;
-  body.appendChild(qWrap);
-
-  // Choices
-  const choicesDiv = document.createElement('div');
-  choicesDiv.className = 'choices-list';
-
-  order.forEach((origIdx, displayPos) => {
-    const btn = document.createElement('button');
-    btn.className = 'choice-btn' + (userAnswers[curQ] === displayPos ? ' selected' : '');
-    btn.innerHTML = `<span class="choice-num">${displayPos+1}</span><span>${q.choices[origIdx]}</span>`;
-    btn.onclick = () => selectChoice(displayPos);
-    choicesDiv.appendChild(btn);
+function renderLevelList(){
+  // Sort by lessonOrder then by original index
+  var sorted = LEVELS.map(function(l,i){return{lvl:l,idx:i}});
+  sorted.sort(function(a,b){
+    if(a.lvl.lessonOrder !== b.lvl.lessonOrder) return a.lvl.lessonOrder - b.lvl.lessonOrder;
+    return a.idx - b.idx;
   });
 
-  body.appendChild(choicesDiv);
+  var container = document.getElementById('lvl-list-container');
+  container.innerHTML = '';
+  var lessonColors={1:'background:var(--blue);color:#fff',2:'background:var(--pink);color:#fff',3:'background:var(--green);color:var(--black)'};
+  sorted.forEach(function(item, num){
+    var l = item.lvl; var i = item.idx;
+    var numStyle = lessonColors[l.lessonOrder] || 'background:var(--blue);color:#fff';
+    var div = document.createElement('div');
+    div.className = 'lvl-item';
+    div.onclick = function(){startLevel(i)};
+    div.innerHTML =
+      '<div class="lvl-num" style="'+numStyle+'">'+(num+1)+'</div>'+
+      '<div style="flex:1">'+
+        '<div class="lvl-name">'+l.name+'</div>'+
+        '<div class="lvl-meta">'+l.lesson+' · '+l.sub+'</div>'+
+      '</div>'+
+      '';
+    container.appendChild(div);
+  });
+
+  // Update CFP2 card-sub
+  var lessons = [...new Set(LEVELS.map(function(l){return l.lesson}))].length;
+  var el = document.getElementById('cfp2-card-sub');
+  if(el) el.innerHTML = lessons+' บทเรียน <span style="font-size:3em;line-height:0;vertical-align:middle">·</span> '+LEVELS.length+' ด่าน';
 }
 
-function selectChoice(displayPos){
-  userAnswers[curQ] = displayPos;
-  renderQuestion();
+// Init card-sub on load
+window.addEventListener('load',function(){
+  updateHomeCountdown();
+  var saved=localStorage.getItem(EXAM_KEY);
+  var el=document.getElementById('exam-date-input');
+  if(el&&saved)el.value=saved;
+  var lessons=[...new Set(LEVELS.map(function(l){return l.lesson}))].length;
+  var el=document.getElementById('cfp2-card-sub');
+  if(el)el.innerHTML=lessons+' บทเรียน <span style="font-size:3em;line-height:0;vertical-align:middle">·</span> '+LEVELS.length+' ด่าน';
+});
+function backToLevels(){showScreen('level-screen')}
+function confirmBack(){clearInterval(timerInt);backToLevels()}
+
+function startLevel(idx){
+  curLvl=idx;const lvl=LEVELS[idx];
+  timeLeft=lvl.time;score=0;correct=0;total=0;answers=[];placed={};wordEls={};dragIdx=null;
+  document.getElementById('game-title').textContent=lvl.name;
+  document.getElementById('game-sub').textContent=lvl.sub;
+  document.getElementById('timer-val').textContent=timeLeft;
+  document.getElementById('timer-box').classList.remove('urgent');
+  const body=document.getElementById('game-body');body.innerHTML='';
+  buildGroup(lvl,body);showScreen('game-screen');
+  startTime=Date.now();clearInterval(timerInt);timerInt=setInterval(tick,1000);
 }
 
-function prevQ(){
-  if(curQ > 0){ curQ--; renderQuestion(); }
+function buildGroup(lvl,body){
+  total=lvl.words.length;
+  if(lvl.desc){const d=document.createElement('div');d.className='desc-banner';d.innerHTML=lvl.desc;body.appendChild(d)}
+  const n=lvl.columns.length;
+  const hdr=document.createElement('div');hdr.className='cols-header';hdr.style.gridTemplateColumns=`repeat(${n},1fr)`;
+  lvl.columns.forEach((c,i)=>{const h=document.createElement('div');h.className=`col-head ch${i}`;h.innerHTML=c.replace(/\n/g,'<br>');hdr.appendChild(h)});
+  body.appendChild(hdr);
+  const dzW=document.createElement('div');dzW.className='drop-zones';dzW.style.gridTemplateColumns=`repeat(${n},1fr)`;
+  lvl.columns.forEach((_,i)=>{
+    const dz=document.createElement('div');dz.className=`drop-zone dz${i}`;dz.dataset.col=i;
+    dz.innerHTML=`<div class="dz-hint">วางที่นี่</div>`;
+    dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-over')});
+    dz.addEventListener('dragleave',()=>dz.classList.remove('drag-over'));
+    dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag-over');doDrop(parseInt(dz.dataset.col),dz);resumeAudio();playDrop()});
+    dzW.appendChild(dz);
+  });
+  body.appendChild(dzW);
+  const wbl=document.createElement('div');wbl.className='wb-label';wbl.textContent='— ลากคำไปวางในหมวดที่ถูกต้อง —';body.appendChild(wbl);
+  const bank=document.createElement('div');bank.className='word-bank';
+  lvl.words.map((_,i)=>i).sort(()=>Math.random()-.5).forEach(i=>{const c=makeCard(i,lvl.words[i].text);bank.appendChild(c);wordEls[i]=c});
+  body.appendChild(bank);
+  const sw=document.createElement('div');sw.className='submit-wrap';
+  sw.innerHTML=`<button class="submit-btn" onclick="resumeAudio();playSubmit();submitGroup()">✓ ตรวจคำตอบ</button>`;
+  body.appendChild(sw);
 }
 
-function nextQ(){
-  if(curQ < totalQ - 1){
-    curQ++;
-    renderQuestion();
-  }
+function makeCard(idx,text){
+  const c=document.createElement('div');c.className='word-card';c.dataset.idx=idx;
+  c.innerHTML=text.replace(/\n/g,'<br>');c.draggable=true;
+  c.addEventListener('dragstart',e=>{dragIdx=idx;e.dataTransfer.setData('text/plain',idx);c.classList.add('dragging')});
+  c.addEventListener('dragend',()=>c.classList.remove('dragging'));
+  c.addEventListener('touchstart',tStart,{passive:false});
+  c.addEventListener('touchmove',tMove,{passive:false});
+  c.addEventListener('touchend',tEnd);
+  return c;
 }
-
-function confirmBackToHome(){
-  clearInterval(timerInt);
-  goHome();
+function doDrop(col,dz){
+  if(dragIdx===null)return;const card=wordEls[dragIdx];if(!card)return;
+  card.classList.remove('dragging');card.remove();
+  const hint=dz.querySelector('.dz-hint');if(hint)hint.style.display='none';
+  dz.appendChild(card);card.className=`word-card placed-${col%3}`;placed[dragIdx]=col;
 }
-
-// ===== RESULT =====
+function submitGroup(){
+  clearInterval(timerInt);elapsed=Math.round((Date.now()-startTime)/1000);
+  const lvl=LEVELS[curLvl];score=0;correct=0;
+  lvl.words.forEach((w,i)=>{const my=placed[i];const ok=my===w.col;if(ok){correct++;score+=10;}
+    answers.push({word:w.text.replace(/\n/g,' '),my:my!==undefined?lvl.columns[my].split('\n')[0]:'ไม่ได้วาง',right:lvl.columns[w.col].split('\n')[0],ok,desc:w.desc||''})});
+  total=lvl.words.length;showResult();
+}
+function tStart(e){
+  e.preventDefault();const c=e.currentTarget;dragIdx=parseInt(c.dataset.idx);dragEl=c;
+  const t=e.touches[0];ghost=document.createElement('div');ghost.className='drag-ghost';
+  ghost.innerHTML=c.innerHTML;document.body.appendChild(ghost);moveGhost(t.clientX,t.clientY);c.classList.add('dragging');
+}
+function tMove(e){
+  if(!ghost)return;e.preventDefault();const t=e.touches[0];moveGhost(t.clientX,t.clientY);
+  document.querySelectorAll('.drop-zone').forEach(z=>z.classList.remove('drag-over'));
+  const el=document.elementFromPoint(t.clientX,t.clientY);const dz=el?el.closest('.drop-zone'):null;
+  if(dz)dz.classList.add('drag-over');
+}
+function tEnd(e){
+  if(!ghost)return;const t=e.changedTouches[0];
+  document.querySelectorAll('.drop-zone').forEach(z=>z.classList.remove('drag-over'));
+  const el=document.elementFromPoint(t.clientX,t.clientY);const dz=el?el.closest('.drop-zone'):null;
+  if(dz){doDrop(parseInt(dz.dataset.col),dz);resumeAudio();playDrop();}
+  if(dragEl)dragEl.classList.remove('dragging');ghost.remove();ghost=null;dragEl=null;dragIdx=null;
+}
+function moveGhost(x,y){if(ghost){ghost.style.left=x+'px';ghost.style.top=y+'px'}}
+function tick(){timeLeft--;document.getElementById('timer-val').textContent=timeLeft;if(timeLeft<=10)document.getElementById('timer-box').classList.add('urgent');if(timeLeft<=0)submitGroup();}
 function showResult(){
-  clearInterval(timerInt);
-  const qs = getQuestions();
-  let correct = 0;
-
-  qs.forEach((q, i) => {
-    const order = shuffledOrders[i];
-    const userDisplayPos = userAnswers[i];
-    if(userDisplayPos !== null){
-      const userOrigIdx = order[userDisplayPos];
-      if(userOrigIdx === q.answer) correct++;
-    }
-  });
-
-  const total = totalQ;
-  const pct = Math.round(correct/total*100);
-
-  const ratio = correct/total;
-  let emoji, heading, bg;
-  if(ratio === 1){emoji='🏆';heading='สมบูรณ์แบบ!';bg='rgba(51,223,147,.22)'}
-  else if(ratio >= .8){emoji='😊';heading='ทำได้ดีมาก!';bg='rgba(226,255,30,.3)'}
-  else if(ratio >= .6){emoji='😅';heading='พยายามต่อไป!';bg='rgba(5,73,254,.08)'}
+  const ratio=correct/total;
+  document.getElementById('result-sublabel').textContent=LEVELS[curLvl].name;
+  document.getElementById('r-score').textContent=`${score}/${total*10}`;
+  document.getElementById('r-correct').textContent=`${correct}/${total}`;
+  document.getElementById('r-time').textContent=elapsed+'s';
+  let emoji,heading,bg;
+  if(ratio===1){emoji='🏆';heading='สมบูรณ์แบบ!';bg='rgba(51,223,147,.22)'}
+  else if(ratio>=.7){emoji='😊';heading='ทำได้ดีมาก!';bg='rgba(226,255,30,.3)'}
+  else if(ratio>=.5){emoji='😅';heading='พยายามต่อไป!';bg='rgba(5,73,254,.08)'}
   else{emoji='😓';heading='ต้องฝึกอีกหน่อย!';bg='rgba(255,83,255,.1)'}
-
-  document.getElementById('result-emoji').textContent = emoji;
-  document.getElementById('result-heading').textContent = heading;
-  document.getElementById('result-sublabel').textContent = SETS[curSet].name;
-  document.getElementById('result-hdr').style.background = bg;
-  document.getElementById('r-score').textContent = Math.round(correct/total*100) + '/100';
-  document.getElementById('r-correct').textContent = correct + '/' + total;
-  document.getElementById('r-pct').textContent = pct + '%';
-
-  buildReview();
-  showScreen('result-screen');
-  if(ratio === 1) spawnConfetti();
+  document.getElementById('result-emoji').textContent=emoji;
+  document.getElementById('result-heading').textContent=heading;
+  document.getElementById('result-hdr').style.background=bg;
+  buildReview();document.getElementById('explain-btn').style.display=answers.some(a=>a.desc)?'':'none';
+  showScreen('result-screen');if(ratio===1)spawnConfetti();
 }
-
 function buildReview(){
-  const qs = getQuestions();
-  const list = document.getElementById('review-list');
-  list.innerHTML = '';
-
-  qs.forEach((q, i) => {
-    const order = shuffledOrders[i];
-    const userDisplayPos = userAnswers[i];
-    const unanswered = userDisplayPos === null;
-    const userOrigIdx = unanswered ? null : order[userDisplayPos];
-    const isOk = !unanswered && userOrigIdx === q.answer;
-    const correctDisplayPos = order.indexOf(q.answer);
-
-    const item = document.createElement('div');
-    item.className = 'rv-item';
-    item.onclick = () => openDetail(i);
-
-    const numDiv = document.createElement('div');
-    numDiv.className = 'rv-num ' + (isOk ? 'ok' : 'no');
-    numDiv.textContent = i+1;
-
-    const contentDiv = document.createElement('div');
-    contentDiv.className = 'rv-content';
-
-    const qtext = document.createElement('div');
-    qtext.className = 'rv-qtext';
-    qtext.textContent = q.q;
-
-    const ansDiv = document.createElement('div');
-    ansDiv.className = 'rv-answer ' + (isOk ? 'ok' : 'no');
-    if(unanswered){
-      ansDiv.textContent = '— ไม่ได้ตอบ (เฉลย: ข้อ ' + (correctDisplayPos+1) + ')';
-    } else if(isOk){
-      ansDiv.textContent = '✓ ข้อ ' + (userDisplayPos+1) + ' — ถูกต้อง';
-    } else {
-      ansDiv.textContent = '✗ ตอบข้อ ' + (userDisplayPos+1) + ' → เฉลย: ข้อ ' + (correctDisplayPos+1);
-    }
-
-    contentDiv.appendChild(qtext);
-    contentDiv.appendChild(ansDiv);
-
-    const tapHint = document.createElement('div');
-    tapHint.className = 'rv-tap';
-    tapHint.textContent = 'ดูโจทย์ ›';
-
-    item.appendChild(numDiv);
-    item.appendChild(contentDiv);
-    item.appendChild(tapHint);
-    list.appendChild(item);
-  });
+  const box=document.getElementById('review-box');box.innerHTML='<div class="review-hd">สรุปผล</div>';
+  answers.forEach(a=>{const d=document.createElement('div');d.className='review-item';
+    d.innerHTML=`<div class="rv-dot ${a.ok?'dot-ok':'dot-no'}"></div><div class="rv-word">${a.word}</div><div class="rv-ans ${a.ok?'ok':'no'}">${a.ok?'✓ '+a.right:a.my+' ✗'}</div>`;
+    box.appendChild(d);});
 }
-
-// ===== DETAIL MODAL =====
-function openDetail(qIdx){
-  const qs = getQuestions();
-  const q = qs[qIdx];
-  const order = shuffledOrders[qIdx];
-  const userDisplayPos = userAnswers[qIdx];
-  const userOrigIdx = userDisplayPos !== null ? order[userDisplayPos] : null;
-  const correctDisplayPos = order.indexOf(q.answer);
-
-  document.getElementById('modal-q-num').textContent = 'ข้อที่ ' + (qIdx+1);
-  document.getElementById('modal-q-text').innerHTML = q.q.replace(/\n/g, '<br>');
-
-  const mc = document.getElementById('modal-choices');
-  mc.innerHTML = '';
-
-  order.forEach((origIdx, displayPos) => {
-    const div = document.createElement('div');
-    const isCorrect = origIdx === q.answer;
-    const isUserPick = displayPos === userDisplayPos;
-
-    let cls = 'modal-choice ';
-    if(isCorrect) cls += 'correct';
-    else if(isUserPick && !isCorrect) cls += 'wrong';
-    else cls += 'neutral';
-
-    div.className = cls;
-    div.innerHTML = `<span class="mc-num">${displayPos+1}</span><span>${q.choices[origIdx]}</span>`;
-    mc.appendChild(div);
-  });
-
-  document.getElementById('detail-modal').classList.add('open');
+function retryLevel(){startLevel(curLvl)}
+function openExplain(){
+  const c=document.getElementById('explain-content');c.innerHTML='';
+  answers.filter(a=>a.desc).forEach(a=>{const d=document.createElement('div');d.className='exp-item';
+    d.innerHTML=`<div class="exp-term">${a.word}</div><div class="exp-text">${a.desc}</div>`;c.appendChild(d);});
+  openModal('explain-modal');
 }
-
-function closeModal(){
-  document.getElementById('detail-modal').classList.remove('open');
-}
-function closeModalOuter(e){
-  if(e.target === document.getElementById('detail-modal')) closeModal();
-}
-
-function retryQuiz(){
-  startQuiz(curSet);
-}
-
-// ===== CONFETTI =====
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function closeOuter(e,id){if(e.target===document.getElementById(id))closeModal(id)}
 function spawnConfetti(){
   const w=document.createElement('div');w.className='confetti-wrap';document.body.appendChild(w);
-  const cols=['#0549FE','#33DF93','#FF53FF','rgb(237,255,40)','#1a1a1a'];
+  const cols=['#0549FE','#33DF93','#FF53FF','#E2FF50','#1a1a1a'];
   for(let i=0;i<60;i++){const d=document.createElement('div');d.className='confetti-dot';
     d.style.left=Math.random()*100+'vw';d.style.background=cols[Math.floor(Math.random()*cols.length)];
     d.style.animationDuration=(1.5+Math.random()*2)+'s';d.style.animationDelay=Math.random()*.8+'s';
     const s=(6+Math.random()*8)+'px';d.style.width=d.style.height=s;w.appendChild(d);}
   setTimeout(()=>w.remove(),3500);
 }
+const AC=new(window.AudioContext||window.webkitAudioContext)();
+function resumeAudio(){if(AC.state==='suspended')AC.resume()}
+function playDrop(){try{const o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.frequency.setValueAtTime(600,AC.currentTime);o.frequency.exponentialRampToValueAtTime(400,AC.currentTime+.08);g.gain.setValueAtTime(.12,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.1);o.start();o.stop(AC.currentTime+.1)}catch(e){}}
+function playSubmit(){try{[0,.12,.24].forEach((t,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.frequency.setValueAtTime([440,550,660][i],AC.currentTime+t);g.gain.setValueAtTime(.1,AC.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+t+.15);o.start(AC.currentTime+t);o.stop(AC.currentTime+t+.15)})}catch(e){}}
 
-function goToComingSoon(){ showScreen('coming-soon-screen'); }
-function goToPlanner(){
-  if(!localStorage.getItem(PLANNER_START_KEY))
-    localStorage.setItem(PLANNER_START_KEY, new Date().toISOString().split('T')[0]);
-  renderPlanner();
-  showScreen('planner-screen');
-}
+// ===== FINGER-1 EYE ANIMATION =====
+(function(){
+  // Eye center positions (in SVG viewBox coords)
+  var EYE_L = {cx:69, cy:116};  // center of left white eye
+  var EYE_R = {cx:127, cy:116}; // center of right white eye
+  var RADIUS = 11; // max pupil travel from eye center
+  // Mouth paths
+  var MOUTH_SMILE  = 'M89,160c0,0,1.3,2.2,5.7,2.1c6.5-0.3,9.3-4.1,9.3-4.1';
+  var MOUTH_SHOCKED = 'M92,156 Q94.7,167 97.5,156'; // oval shape pointing down
 
-// ===== PLANNER =====
-const PLANNER_HRS_KEY = 'cfp_planner_hrs';
-const PLANNER_START_KEY = 'cfp_planner_start';
-const PLANNER_EXTRA_KEY = 'cfp_planner_extra'; // 'yes'|'no'
-const PLANNER_CHK_KEY = 'cfp_planner_chk'; // JSON {cfp1,cfp2}
-const PLANNER_BUSY_KEY = 'cfp_planner_busy';
-const ETHICS_LESSONS = 3;
-const CFP1_LESSONS = 8;
-const CFP2_CONTENT_LESSONS = 9;
+  // Sequence: left, up, right, down (shocked), back to smile
+  var SEQ = [
+    {dx:-1, dy:0,  mouth:'smile',   dur:600},
+    {dx:0,  dy:-1, mouth:'smile',   dur:600},
+    {dx:1,  dy:0,  mouth:'smile',   dur:600},
+    {dx:0,  dy:1,  mouth:'shocked', dur:900},
+    {dx:0,  dy:0,  mouth:'smile',   dur:5000},
+  ];
 
-function changeBusyDays(delta){
-  var data = getCountdownData();
-  var maxDays = data ? Math.max(0, data.days) : 999;
-  var current = parseInt(localStorage.getItem(PLANNER_BUSY_KEY) || '0');
-  var next = Math.max(0, Math.min(maxDays, current + delta));
-  localStorage.setItem(PLANNER_BUSY_KEY, next);
-  renderPlanner();
-}
-
-function setExtra(yes){
-  localStorage.setItem(PLANNER_EXTRA_KEY, yes ? 'yes' : 'no');
-  renderPlanner();
-}
-
-function savePlannerHrs(){
-  var val = document.getElementById('pl-hrs-select').value;
-  localStorage.setItem(PLANNER_HRS_KEY, val);
-  if(!localStorage.getItem(PLANNER_START_KEY))
-    localStorage.setItem(PLANNER_START_KEY, new Date().toISOString().split('T')[0]);
-  // save checkboxes
-  var chk1 = document.getElementById('chk-cfp1');
-  var chk2 = document.getElementById('chk-cfp2');
-  if(chk1 && chk2)
-    localStorage.setItem(PLANNER_CHK_KEY, JSON.stringify({cfp1: chk1.checked, cfp2: chk2.checked}));
-  renderPlanner();
-}
-
-function renderPlanner(){
-  var data = getCountdownData();
-  var hrsPerDay = parseFloat(localStorage.getItem(PLANNER_HRS_KEY) || '2');
-  var startStr = localStorage.getItem(PLANNER_START_KEY);
-  var extraMode = localStorage.getItem(PLANNER_EXTRA_KEY) || 'no';
-  var chkData = JSON.parse(localStorage.getItem(PLANNER_CHK_KEY) || '{"cfp1":false,"cfp2":false}');
-
-  // Restore select
-  var sel = document.getElementById('pl-hrs-select');
-  if(sel) sel.value = hrsPerDay;
-
-  // Restore toggle buttons
-  var btnYes = document.getElementById('pl-extra-yes');
-  var btnNo = document.getElementById('pl-extra-no');
-  if(btnYes && btnNo){
-    btnYes.className = 'pl-toggle-btn' + (extraMode==='yes' ? ' active' : '');
-    btnNo.className = 'pl-toggle-btn' + (extraMode==='no' ? ' active' : '');
+  function setPupils(dx, dy){
+    var pl = document.getElementById('f1-pupil-l');
+    var pr = document.getElementById('f1-pupil-r');
+    if(!pl||!pr) return;
+    pl.setAttribute('cx', EYE_L.cx + dx*RADIUS);
+    pl.setAttribute('cy', EYE_L.cy + dy*RADIUS);
+    pr.setAttribute('cx', EYE_R.cx + dx*RADIUS);
+    pr.setAttribute('cy', EYE_R.cy + dy*RADIUS);
   }
 
-  // Show/hide extra options
-  var extraOpts = document.getElementById('pl-extra-options');
-  if(extraOpts) extraOpts.style.display = extraMode==='yes' ? 'flex' : 'none';
-
-  // Restore checkboxes
-  var chk1 = document.getElementById('chk-cfp1');
-  var chk2 = document.getElementById('chk-cfp2');
-  if(chk1) chk1.checked = chkData.cfp1;
-  if(chk2) chk2.checked = chkData.cfp2;
-
-  // Calculate total lessons
-  var totalLessons = ETHICS_LESSONS;
-  if(extraMode === 'yes'){
-    if(chkData.cfp1) totalLessons += CFP1_LESSONS;
-    if(chkData.cfp2) totalLessons += CFP2_CONTENT_LESSONS;
+  function setMouth(type){
+    var m = document.getElementById('f1-mouth');
+    if(!m) return;
+    if(type === 'shocked'){
+      m.setAttribute('d', MOUTH_SHOCKED);
+      m.setAttribute('fill', '#1A1A1A');
+      m.setAttribute('stroke', 'none');
+    } else {
+      m.setAttribute('d', MOUTH_SMILE);
+      m.setAttribute('fill', 'none');
+      m.setAttribute('stroke', '#1A1A1A');
+    }
   }
 
-  // No date state
-  var noDate = document.getElementById('pl-no-date');
-  var daysCard = document.getElementById('pl-days-card');
-  if(!data){
-    noDate.style.display = '';
-    daysCard.style.opacity = '.4';
-    document.getElementById('pl-days-val').textContent = '—';
-    document.getElementById('pl-total-hrs-clock').textContent = '—';
-    document.getElementById('pl-real-hrs').textContent = '— ชั่วโมง';
-    document.getElementById('pl-lesson-list').innerHTML = '';
-    document.getElementById('pl-progress-fill').style.width = '0%';
-    document.getElementById('pl-used-label').textContent = 'ใช้ไป — ชั่วโมง';
-    document.getElementById('pl-pct-label').textContent = '—%';
-    return;
-  }
-  noDate.style.display = 'none';
-  daysCard.style.opacity = '1';
-
-  var busyDays = parseInt(localStorage.getItem(PLANNER_BUSY_KEY) || '0');
-  busyDays = Math.min(busyDays, Math.max(0, data.days)); // cap at available days
-
-  // Restore busy days UI
-  var busyVal = document.getElementById('pl-busy-val');
-  var busyNote = document.getElementById('pl-busy-note');
-  if(busyVal) busyVal.textContent = busyDays;
-  if(busyNote) busyNote.style.display = busyDays > 0 ? '' : 'none';
-
-  var days = Math.max(0, data.days);
-  var effectiveDays = Math.max(0, days - busyDays);
-  var totalClockHrs = days * 24;
-  var realHrs = effectiveDays * hrsPerDay;
-  var perLesson = totalLessons > 0 ? realHrs / totalLessons : 0;
-
-  document.getElementById('pl-days-val').textContent = days + ' วัน' + (busyDays > 0 ? ' (ว่าง ' + effectiveDays + ' วัน)' : '');
-  document.getElementById('pl-total-hrs-clock').textContent = totalClockHrs.toLocaleString() + ' ชั่วโมง';
-  document.getElementById('pl-real-hrs').textContent = realHrs.toFixed(1) + ' ชั่วโมง';
-
-  // Lesson breakdown label
-  var lblEl = document.getElementById('pl-lesson-label');
-  if(lblEl) lblEl.textContent = 'เฉลี่ยต่อบทเรียน (' + totalLessons + ' บท)';
-
-  // Lesson rows
-  var ll = document.getElementById('pl-lesson-list');
-  ll.innerHTML = '';
-  var groups = [{ label: 'จรรยาบรรณ CFP2 (3 บท)', count: ETHICS_LESSONS }];
-  if(extraMode==='yes' && chkData.cfp1) groups.push({ label: 'CFP ชุดวิชาที่ 1 (8 บท)', count: CFP1_LESSONS });
-  if(extraMode==='yes' && chkData.cfp2) groups.push({ label: 'CFP ชุดวิชาที่ 2 เนื้อหา (9 บท)', count: CFP2_CONTENT_LESSONS });
-
-  // Summary line
-  var summaryRow = document.createElement('div');
-  summaryRow.style.cssText = 'font-size:.78rem;font-family:Sarabun,sans-serif;color:rgba(255,255,255,.55);margin-bottom:8px';
-  if(groups.length > 1){
-    var labels = groups.map(function(g){ return g.count + ' บท'; }).join(' + ');
-    summaryRow.textContent = labels + ' = รวม ' + totalLessons + ' บท';
-    ll.appendChild(summaryRow);
+  function runAnim(){
+    var i = 0;
+    function step(){
+      if(i >= SEQ.length){ i=0; }
+      var s = SEQ[i];
+      setPupils(s.dx, s.dy);
+      setMouth(s.mouth);
+      i++;
+      setTimeout(step, s.dur);
+    }
+    step();
   }
 
-  groups.forEach(function(g){
-    var groupPer = realHrs / totalLessons * g.count;
-    var row = document.createElement('div');
-    row.className = 'pl-lesson-row';
-    row.style.borderBottomColor = 'rgba(255,255,255,.12)';
-    row.innerHTML = '<div class="pl-lesson-name" style="color:rgb(237,255,40)">' + g.label + '</div><div class="pl-lesson-hrs" style="color:#fff">~' + groupPer.toFixed(1) + ' ชม.</div>';
-    ll.appendChild(row);
+  window.addEventListener('load', function(){
+    setTimeout(runAnim, 800); // เริ่มหลัง page load 0.8 วิ
   });
+})();
 
-  var perRow = document.createElement('div');
-  perRow.style.cssText = 'font-size:.8rem;font-family:Sarabun,sans-serif;color:var(--pink);font-weight:700;padding:8px 0 0;text-align:right';
-  perRow.textContent = 'เฉลี่ยบทละ ~' + perLesson.toFixed(1) + ' ชั่วโมง';
-  ll.appendChild(perRow);
 
-  // Progress
-  var usedHrs = 0, pct = 0;
-  if(startStr && realHrs > 0){
-    var start = new Date(startStr + 'T00:00:00');
-    var now2 = new Date(); now2.setHours(0,0,0,0);
-    var daysPassed = Math.max(0, Math.round((now2 - start) / (1000*60*60*24)));
-    usedHrs = daysPassed * hrsPerDay;
-    var totalPlanned = (effectiveDays + daysPassed) * hrsPerDay;
-    pct = totalPlanned > 0 ? Math.min(100, Math.round(usedHrs / totalPlanned * 100)) : 0;
-    var barColor = pct === 0 ? 'rgb(175,255,235)' : pct >= 80 ? 'var(--pink)' : 'rgb(237,255,40)';
-    document.getElementById('pl-progress-fill').style.background = barColor;
-    document.getElementById('pl-progress-fill').style.width = pct + '%';
-    document.getElementById('pl-used-label').textContent = 'ใช้ไปแล้ว ~' + usedHrs.toFixed(1) + ' ชม.';
-    document.getElementById('pl-pct-label').textContent = pct + '%';
-  } else {
-    document.getElementById('pl-progress-fill').style.background = 'rgb(175,255,235)';
-    document.getElementById('pl-progress-fill').style.width = '0%';
-    document.getElementById('pl-used-label').textContent = 'เริ่มนับเมื่อตั้งค่าครั้งแรก';
-    document.getElementById('pl-pct-label').textContent = '0%';
+// ===== FINGER-2 EYE ANIMATION =====
+(function(){
+  var EYE_R = {cx:161, cy:135}; // right eye center
+  var EYE_L = {cx:103, cy:135}; // left eye center
+  var RADIUS = 11;
+  var MOUTH_SMILE   = 'M130,179c0,0-1.3,2.2-5.7,2.1c-6.5-0.3-9.3-4.1-9.3-4.1';
+  var MOUTH_SHOCKED = 'M124,174 Q126.7,185 129.5,174';
+
+  // ขวา → บน → ซ้าย → ลง(ปากตกใจ) → หยุด
+  // delay 2.0วิ ให้ "บน" ตรงกับ "ลง-ตกใจ" ของตัว 1
+  var SEQ = [
+    {dx:1,  dy:0,  mouth:'smile',   dur:600},
+    {dx:0,  dy:-1, mouth:'shocked', dur:600},  // บน = ตรงกับที่ตัว 1 มองลง
+    {dx:-1, dy:0,  mouth:'smile',   dur:600},
+    {dx:0,  dy:1,  mouth:'smile',   dur:900},
+    {dx:0,  dy:0,  mouth:'smile',   dur:5000},
+  ];
+
+  function setPupils(dx, dy){
+    var pr = document.getElementById('f2-pupil-r');
+    var pl = document.getElementById('f2-pupil-l');
+    if(!pr||!pl) return;
+    pr.setAttribute('cx', EYE_R.cx + dx*RADIUS);
+    pr.setAttribute('cy', EYE_R.cy + dy*RADIUS);
+    pl.setAttribute('cx', EYE_L.cx + dx*RADIUS);
+    pl.setAttribute('cy', EYE_L.cy + dy*RADIUS);
   }
-}
 
-// ===== DATE MODAL =====
-function openDateModal(){
-  var saved = localStorage.getItem(EXAM_KEY);
-  var input = document.getElementById('date-input');
-  if(saved) input.value = saved;
-  renderDateModalCountdown();
-  document.getElementById('date-modal').classList.add('open');
-}
-function closeDateModal(){
-  document.getElementById('date-modal').classList.remove('open');
-}
-function closeDateModalOuter(e){
-  if(e.target === document.getElementById('date-modal')) closeDateModal();
-}
-function saveDateModal(){
-  var val = document.getElementById('date-input').value;
-  if(!val) return;
-  localStorage.setItem(EXAM_KEY, val);
-  renderDateModalCountdown();
-  updateMockCountdown();
-}
-function clearDateModal(){
-  localStorage.removeItem(EXAM_KEY);
-  document.getElementById('date-input').value = '';
-  renderDateModalCountdown();
-  updateMockCountdown();
-}
-function renderDateModalCountdown(){
-  var data = getCountdownData();
-  var cdBox = document.getElementById('date-countdown-display');
-  var emptyBox = document.getElementById('date-empty-display');
-  if(!data){
-    cdBox.style.display = 'none';
-    emptyBox.style.display = '';
-    return;
+  function setMouth(type){
+    var m = document.getElementById('f2-mouth');
+    if(!m) return;
+    if(type === 'shocked'){
+      m.setAttribute('d', MOUTH_SHOCKED);
+      m.setAttribute('fill', '#1A1A1A');
+      m.setAttribute('stroke', 'none');
+    } else {
+      m.setAttribute('d', MOUTH_SMILE);
+      m.setAttribute('fill', 'none');
+      m.setAttribute('stroke', '#1A1A1A');
+    }
   }
-  cdBox.style.display = '';
-  emptyBox.style.display = 'none';
-  if(data.days < 0){
-    document.getElementById('date-cd-days').textContent = 'หมดเวลา';
-    document.getElementById('date-cd-label').textContent = 'ผ่านวันสอบไปแล้ว';
-    document.getElementById('date-cd-hours').textContent = '';
-  } else if(data.days === 0){
-    document.getElementById('date-cd-days').textContent = 'วันนี้!';
-    document.getElementById('date-cd-label').textContent = 'โชคดีนะ! 🎯';
-    document.getElementById('date-cd-hours').textContent = '';
-  } else {
-    document.getElementById('date-cd-days').textContent = data.days;
-    document.getElementById('date-cd-label').textContent = 'วันที่เหลือก่อนสอบ';
-    document.getElementById('date-cd-hours').textContent = '(' + data.hours.toLocaleString() + ' ชั่วโมง)';
-  }
-}
 
-// ===== EXAM COUNTDOWN (shared key with main game) =====
-const EXAM_KEY = 'cfp_exam_date';
-function getCountdownData(){
-  var saved = localStorage.getItem(EXAM_KEY);
-  if(!saved) return null;
-  var exam = new Date(saved + 'T00:00:00');
-  var now = new Date(); now.setHours(0,0,0,0);
-  var diffMs = exam - now;
-  var days = Math.ceil(diffMs / (1000*60*60*24));
-  return { days: days, hours: days*24, dateStr: saved };
-}
-function updateMockCountdown(){
-  var el = document.getElementById('mock-countdown-text');
-  if(!el) return;
-  var data = getCountdownData();
-  if(!data){
-    el.textContent = '— ตั้งวันสอบได้ที่ปุ่มชมพูด้านล่าง —';
-  } else if(data.days < 0){
-    el.textContent = 'ผ่านวันสอบไปแล้ว';
-  } else if(data.days === 0){
-    el.textContent = 'วันสอบคือวันนี้! 🎯';
-  } else {
-    el.textContent = 'เหลืออีก ' + data.days + ' วัน (' + data.hours.toLocaleString() + ' ชั่วโมง)';
+  function runAnim(){
+    var i = 0;
+    function step(){
+      if(i >= SEQ.length){ i=0; }
+      var s = SEQ[i];
+      setPupils(s.dx, s.dy);
+      setMouth(s.mouth);
+      i++;
+      setTimeout(step, s.dur);
+    }
+    step();
   }
-}
 
-// ===== INIT =====
-window.addEventListener('load', function(){
-  renderHome();
-  updateMockCountdown();
-});
+  window.addEventListener('load', function(){
+    // delay 2.0วิ: 0.8(load wait) + 0.6+0.6 = ให้ step "บน" ตรงกับตัว 1 step "ลง"
+    setTimeout(runAnim, 2000);
+  });
+})();
+
 </script>
-<!-- PLANNER -->
-<div class="screen" id="planner-screen">
-  <div class="planner-hdr">
-    <button class="planner-hdr-back" onclick="goHome()">←</button>
-    <div>
-      <div style="font-size:.95rem;font-weight:700;color:var(--black)">วางแผนเตรียมสอบอย่างละเอียด</div>
-      <div style="font-size:.7rem;color:rgba(0,0,0,.45);font-family:'Sarabun',sans-serif">คำนวณเวลาที่มีก่อนวันสอบ</div>
-    </div>
-  </div>
-  <div class="planner-body">
-
-    <!-- No date warning -->
-    <div class="pl-no-date" id="pl-no-date" style="display:none">
-      ⚠️ ยังไม่ได้ตั้งวันสอบ — กดปุ่มชมพูที่หน้าหลักเพื่อตั้งวันสอบก่อนนะครับ
-    </div>
-
-    <!-- Days remaining -->
-    <div class="pl-card" id="pl-days-card">
-      <div class="pl-card-title">เวลาที่เหลือก่อนสอบ</div>
-      <div class="pl-stat-row">
-        <div class="pl-stat-label">วันที่เหลือ</div>
-        <div class="pl-stat-val" id="pl-days-val">—</div>
-      </div>
-      <div class="pl-stat-row">
-        <div class="pl-stat-label">คิดเป็นชั่วโมงรวม</div>
-        <div class="pl-stat-val" id="pl-total-hrs-clock" style="color:var(--muted)">—</div>
-      </div>
-    </div>
-
-    <!-- Hours per day input -->
-    <div class="pl-card">
-      <div class="pl-card-title">เวลาที่มีต่อวัน</div>
-      <div class="pl-hrs-row">
-        <div class="pl-hrs-label">ฉันมีเวลาเตรียมสอบวันละ</div>
-        <select class="pl-hrs-select" id="pl-hrs-select" onchange="savePlannerHrs()">
-          <option value="0.5">0.5</option>
-          <option value="1">1</option>
-          <option value="1.5">1.5</option>
-          <option value="2" selected>2</option>
-          <option value="2.5">2.5</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
-          <option value="6">6</option>
-          <option value="8">8</option>
-        </select>
-        <div style="font-size:.85rem;font-family:'Sarabun',sans-serif">ชั่วโมง</div>
-      </div>
-    </div>
-
-    <!-- Busy days -->
-    <div class="pl-card">
-      <div class="pl-card-title">วันที่ไม่ว่าง</div>
-      <div class="pl-hrs-row">
-        <div class="pl-hrs-label">วันที่<span style="color:#e63946;font-weight:700">ไม่ได้</span>เตรียมสอบ</div>
-        <div style="display:flex;align-items:center;gap:6px">
-          <button onclick="changeBusyDays(-1)" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:#fff;font-size:1.1rem;cursor:pointer;font-family:'Prompt',sans-serif">−</button>
-          <div id="pl-busy-val" style="width:36px;text-align:center;font-size:1.1rem;font-weight:800;font-family:'Prompt',sans-serif">0</div>
-          <button onclick="changeBusyDays(1)" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:#fff;font-size:1.1rem;cursor:pointer;font-family:'Prompt',sans-serif">+</button>
-        </div>
-        <div style="font-size:.85rem;font-family:'Sarabun',sans-serif">วัน</div>
-      </div>
-      <div id="pl-busy-note" style="font-size:.72rem;color:var(--muted);font-family:'Sarabun',sans-serif;margin-top:8px;display:none">
-        หักออกจากวันที่เหลือทั้งหมด
-      </div>
-    </div>
-
-    <!-- Summary -->
-    <div class="pl-card" style="background:var(--green);border-color:rgba(0,0,0,.08)">
-      <div class="pl-card-title" style="color:rgba(0,0,0,.45)">สรุปเวลาเตรียมสอบ</div>
-      <div style="background:#004d30;border-radius:12px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-size:.82rem;font-family:'Sarabun',sans-serif;color:rgba(255,255,255,.7)">เวลาเตรียมสอบที่มีทั้งหมด</div>
-        <div id="pl-real-hrs" style="font-size:1.3rem;font-weight:800;color:#fff">— ชั่วโมง</div>
-      </div>
-      <div style="background:#004d30;border-radius:12px;padding:14px 16px;margin-bottom:12px">
-        <div style="font-size:.78rem;color:rgba(255,255,255,.55);font-family:'Sarabun',sans-serif;margin-bottom:8px" id="pl-lesson-label">เฉลี่ยต่อบทเรียน (3 บท)</div>
-        <div id="pl-lesson-list"></div>
-      </div>
-      <div style="font-size:.78rem;color:rgba(0,0,0,.45);font-family:'Sarabun',sans-serif;margin-bottom:6px">ความคืบหน้าเวลาที่ใช้ไป</div>
-      <div class="progress-track" style="background:rgba(0,0,0,.15)"><div class="progress-fill" id="pl-progress-fill" style="width:0%"></div></div>
-      <div class="pl-progress-labels" style="color:rgba(0,0,0,.5)">
-        <span id="pl-used-label">ใช้ไป 0 ชั่วโมง</span>
-        <span id="pl-pct-label">0%</span>
-      </div>
-    </div>
-
-    <!-- Extra subjects -->
-    <div class="pl-card">
-      <div class="pl-card-title">รวมเนื้อหาวิชาอื่น</div>
-      <div style="font-size:.84rem;font-family:'Sarabun',sans-serif;color:var(--black);margin-bottom:12px">เพิ่มเวลาเตรียมตัวรวมกับเนื้อหาอื่นหรือไม่?</div>
-      <div style="display:flex;gap:8px;margin-bottom:14px">
-        <button id="pl-extra-yes" onclick="setExtra(true)" class="pl-toggle-btn pl-toggle-no" style="flex:1">Yes</button>
-        <button id="pl-extra-no" onclick="setExtra(false)" class="pl-toggle-btn pl-toggle-no" style="flex:1">No</button>
-      </div>
-      <div id="pl-extra-options" style="display:none;flex-direction:column;gap:8px">
-        <label class="pl-checkbox-row">
-          <input type="checkbox" id="chk-cfp1" onchange="savePlannerHrs()">
-          <span class="pl-checkbox-label">CFP ชุดวิชาที่ 1 <span style="color:var(--muted)">(8 บทเรียน)</span></span>
-        </label>
-        <label class="pl-checkbox-row">
-          <input type="checkbox" id="chk-cfp2" onchange="savePlannerHrs()">
-          <span class="pl-checkbox-label">CFP ชุดวิชาที่ 2 เนื้อหาวิชา <span style="color:var(--muted)">(9 บทเรียน)</span></span>
-        </label>
-      </div>
-    </div>
-
-    <!-- Disclaimer -->
-    <div style="font-size:.72rem;color:var(--muted);font-family:'Sarabun',sans-serif;text-align:center;line-height:1.8;padding:0 4px 8px">
-      ตัวเลขนี้เป็นการประมาณการให้เห็นเวลาเตรียมตัวที่มีอยู่จริงเท่านั้น<br>ผู้สอบต้องบริหารเวลาให้เหมาะกับบริบทของตัวเองครับ
-    </div>
-
-  </div>
-</div>
 
 <!-- COMING SOON -->
 <div class="screen" id="coming-soon-screen">
-  <div style="width:100%;background:var(--green);display:flex;align-items:center;gap:12px;padding:18px 18px 20px">
-    <button class="back-btn" style="border-color:rgba(0,0,0,.2);color:var(--black)" onclick="goHome()">←</button>
+  <div class="cs-header">
+    <button class="back-btn" onclick="goHome()">←</button>
     <div>
-      <div style="font-size:.95rem;font-weight:700;color:var(--black)">เกมอื่นๆ และแหล่งความรู้</div>
-      <div style="font-size:.7rem;color:rgba(0,0,0,.45);font-family:'Sarabun',sans-serif">กำลังดำเนินการ</div>
+      <div class="cs-htitle" id="cs-title-text">CFP1</div>
+      <div style="font-size:.7rem;color:rgba(255,255,255,.5);font-family:'Sarabun',sans-serif">กำลังดำเนินการ</div>
     </div>
   </div>
-  <div style="width:100%;max-width:420px;padding:60px 18px;display:flex;flex-direction:column;align-items:center;gap:20px;text-align:center">
-    <div style="font-size:72px;line-height:1;animation:wobble 2s ease infinite">🚧</div>
-    <div style="font-size:1.3rem;font-weight:800;color:var(--black)">อยู่ระหว่างดำเนินการ</div>
-    <div style="font-size:.88rem;color:var(--muted);font-family:'Sarabun',sans-serif;line-height:1.8">เนื้อหาส่วนนี้กำลังอยู่ระหว่างการพัฒนา<br>โปรดติดตามการอัปเดตเร็วๆ นี้</div>
+  <div class="cs-body">
+    <div class="cs-icon">🚧</div>
+    <div class="cs-title">อยู่ระหว่างดำเนินการ</div>
+    <div class="cs-sub">เนื้อหาส่วนนี้กำลังอยู่ระหว่างการพัฒนา<br>โปรดติดตามการอัปเดตเร็วๆ นี้</div>
     <button class="btn-blue" style="margin-top:12px" onclick="goHome()">← กลับหน้าหลัก</button>
   </div>
+  <div class="bottom-nav">
+  <div class="bottom-nav-line"></div>
+  <div class="bottom-nav-btns">    <button class="nav-btn nb-blue" onclick="goHome()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 66" width="45" height="45"><path fill="none" stroke="#fff" stroke-width="2" stroke-miterlimit="10" d="M41,45.1h-17c-1.1,0-2-0.9-2-2V29.7c0-1,0.5-1.9,1.2-2.5l7.3-5.6c1.1-0.9,2.7-0.9,3.8,0l7.3,5.6c0.8,0.6,1.2,1.5,1.2,2.5v13.4C42.9,44.2,42.1,45.1,41,45.1z"/></svg>
+    </button>
+    <button class="nav-btn nb-pink" onclick="goToCalendar()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 66" width="45" height="45"><path fill="none" stroke="#fff" stroke-width="2" stroke-miterlimit="10" d="M41.9,45h-19c-1.4,0-2.5-1.1-2.5-2.5v-19c0-1.4,1.1-2.5,2.5-2.5h19c1.4,0,2.5,1.1,2.5,2.5v19C44.4,43.9,43.2,45,41.9,45z"/><line fill="none" stroke="#fff" stroke-width="2" stroke-miterlimit="10" x1="20.4" y1="28.3" x2="44.4" y2="28.3"/></svg>
+    </button>
+    <button class="nav-btn nb-green">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 66" width="45" height="45"><path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10" d="M29.4,32c0,0,1,1,3,1s3-1,3-1"/><circle fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10" cx="32.4" cy="33" r="12"/><circle fill="#fff" cx="28.9" cy="26.4" r="1.9"/><circle fill="#fff" cx="34.9" cy="26.4" r="1.9"/></svg>
+    </button>
+  </div></div>
 </div>
-
-<!-- GRID MODAL -->
-<div class="modal-overlay" id="grid-modal" onclick="closeGridModalOuter(event)">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">📋 เลือกข้อ</div>
-    <div style="font-size:.75rem;color:var(--muted);font-family:'Sarabun',sans-serif;margin-bottom:12px">
-      <span style="display:inline-flex;align-items:center;gap:5px;margin-right:12px">
-        <span style="width:14px;height:14px;border-radius:4px;background:rgba(255,83,255,.12);border:2px solid rgba(255,83,255,.35);display:inline-block"></span>ตอบแล้ว
-      </span>
-      <span style="display:inline-flex;align-items:center;gap:5px">
-        <span style="width:14px;height:14px;border-radius:4px;background:#f0f0e8;display:inline-block"></span>ยังไม่ตอบ
-      </span>
-    </div>
-    <div class="q-grid-wrap" id="q-grid"></div>
-    <button class="modal-close" onclick="closeGridModal()">ปิด</button>
-  </div>
-</div>
-
-<!-- DATE MODAL -->
-<div class="modal-overlay" id="date-modal" onclick="closeDateModalOuter(event)">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">📅 ตั้งวันสอบ</div>
-    <div id="date-countdown-display" style="background:var(--pink);border-radius:14px;padding:20px;text-align:center;color:#fff;margin-bottom:16px;display:none">
-      <div id="date-cd-days" style="font-size:2.8rem;font-weight:800;line-height:1"></div>
-      <div id="date-cd-label" style="font-size:.82rem;font-family:'Sarabun',sans-serif;opacity:.85;margin-top:4px"></div>
-      <div id="date-cd-hours" style="font-size:1rem;font-weight:700;opacity:.9;margin-top:2px"></div>
-    </div>
-    <div id="date-empty-display" style="background:#fff;border:2px dashed #e0ded6;border-radius:14px;padding:18px;text-align:center;color:#888;font-family:'Sarabun',sans-serif;font-size:.88rem;margin-bottom:16px">
-      ยังไม่ได้ตั้งวันสอบ
-    </div>
-    <input type="date" id="date-input" style="width:100%;padding:13px 14px;border:2px solid #e0ded6;border-radius:11px;font-family:'Prompt',sans-serif;font-size:1rem;color:#1A1A1A;background:#fff;outline:none;box-sizing:border-box;margin-bottom:10px">
-    <button onclick="saveDateModal()" style="width:100%;padding:14px;background:var(--pink);color:#fff;border:none;border-radius:13px;font-family:'Prompt',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;margin-bottom:8px">บันทึกวันสอบ</button>
-    <button onclick="clearDateModal()" style="width:100%;padding:12px;background:#fff;color:#888;border:1px solid #e0ded6;border-radius:13px;font-family:'Prompt',sans-serif;font-size:.88rem;cursor:pointer;margin-bottom:8px">ล้างวันที่</button>
-    <button onclick="closeDateModal()" style="width:100%;padding:12px;background:var(--blue);color:#fff;border:none;border-radius:11px;font-family:'Prompt',sans-serif;font-weight:600;font-size:.88rem;cursor:pointer">ปิด</button>
-  </div>
-</div>
-
 </body>
 </html>
