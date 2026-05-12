@@ -254,7 +254,7 @@ body{background:var(--bg);font-family:'Prompt',sans-serif;color:var(--black);min
 .pl-hrs-select{border:2px solid var(--border);border-radius:9px;padding:8px 10px;font-family:'Prompt',sans-serif;font-size:.95rem;font-weight:700;color:var(--black);background:#fff;outline:none;width:90px;text-align:center}
 .pl-hrs-select.editing{border-color:#e63946;background:rgba(230,57,70,.05)}
 .progress-track{height:10px;background:#f0f0e8;border-radius:5px;overflow:hidden;margin-top:6px}
-.progress-fill{height:100%;border-radius:5px 0 0 5px;background:rgb(175,255,235);transition:width .4s ease,background .4s ease}
+.progress-fill{height:100%;border-radius:5px;background:var(--green);transition:width .4s ease}
 .pl-progress-labels{display:flex;justify-content:space-between;font-size:.68rem;color:var(--muted);margin-top:4px;font-family:'Sarabun',sans-serif}
 .pl-lesson-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
 .pl-lesson-row:last-child{border-bottom:none}
@@ -822,12 +822,7 @@ function spawnConfetti(){
 }
 
 function goToComingSoon(){ showScreen('coming-soon-screen'); }
-function goToPlanner(){
-  if(!localStorage.getItem(PLANNER_START_KEY))
-    localStorage.setItem(PLANNER_START_KEY, new Date().toISOString().split('T')[0]);
-  renderPlanner();
-  showScreen('planner-screen');
-}
+function goToPlanner(){ renderPlanner(); showScreen('planner-screen'); }
 
 // ===== PLANNER =====
 const PLANNER_HRS_KEY = 'cfp_planner_hrs';
@@ -952,7 +947,7 @@ function renderPlanner(){
 
   // Summary line
   var summaryRow = document.createElement('div');
-  summaryRow.style.cssText = 'font-size:.78rem;font-family:Sarabun,sans-serif;color:rgba(255,255,255,.55);margin-bottom:8px';
+  summaryRow.style.cssText = 'font-size:.78rem;font-family:Sarabun,sans-serif;color:var(--muted);margin-bottom:8px';
   if(groups.length > 1){
     var labels = groups.map(function(g){ return g.count + ' บท'; }).join(' + ');
     summaryRow.textContent = labels + ' = รวม ' + totalLessons + ' บท';
@@ -963,13 +958,12 @@ function renderPlanner(){
     var groupPer = realHrs / totalLessons * g.count;
     var row = document.createElement('div');
     row.className = 'pl-lesson-row';
-    row.style.borderBottomColor = 'rgba(255,255,255,.12)';
-    row.innerHTML = '<div class="pl-lesson-name" style="color:rgb(237,255,40)">' + g.label + '</div><div class="pl-lesson-hrs" style="color:#fff">~' + groupPer.toFixed(1) + ' ชม.</div>';
+    row.innerHTML = '<div class="pl-lesson-name">' + g.label + '</div><div class="pl-lesson-hrs">~' + groupPer.toFixed(1) + ' ชม.</div>';
     ll.appendChild(row);
   });
 
   var perRow = document.createElement('div');
-  perRow.style.cssText = 'font-size:.8rem;font-family:Sarabun,sans-serif;color:var(--pink);font-weight:700;padding:8px 0 0;text-align:right';
+  perRow.style.cssText = 'font-size:.8rem;font-family:Sarabun,sans-serif;color:var(--blue);font-weight:700;padding:8px 0 0;text-align:right';
   perRow.textContent = 'เฉลี่ยบทละ ~' + perLesson.toFixed(1) + ' ชั่วโมง';
   ll.appendChild(perRow);
 
@@ -982,13 +976,10 @@ function renderPlanner(){
     usedHrs = daysPassed * hrsPerDay;
     var totalPlanned = (effectiveDays + daysPassed) * hrsPerDay;
     pct = totalPlanned > 0 ? Math.min(100, Math.round(usedHrs / totalPlanned * 100)) : 0;
-    var barColor = pct === 0 ? 'rgb(175,255,235)' : pct >= 80 ? 'var(--pink)' : 'rgb(237,255,40)';
-    document.getElementById('pl-progress-fill').style.background = barColor;
     document.getElementById('pl-progress-fill').style.width = pct + '%';
     document.getElementById('pl-used-label').textContent = 'ใช้ไปแล้ว ~' + usedHrs.toFixed(1) + ' ชม.';
     document.getElementById('pl-pct-label').textContent = pct + '%';
   } else {
-    document.getElementById('pl-progress-fill').style.background = 'rgb(175,255,235)';
     document.getElementById('pl-progress-fill').style.width = '0%';
     document.getElementById('pl-used-label').textContent = 'เริ่มนับเมื่อตั้งค่าครั้งแรก';
     document.getElementById('pl-pct-label').textContent = '0%';
@@ -1148,19 +1139,19 @@ window.addEventListener('load', function(){
     </div>
 
     <!-- Summary -->
-    <div class="pl-card" style="background:var(--green);border-color:rgba(0,0,0,.08)">
-      <div class="pl-card-title" style="color:rgba(0,0,0,.45)">สรุปเวลาเตรียมสอบ</div>
-      <div style="background:#004d30;border-radius:12px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-size:.82rem;font-family:'Sarabun',sans-serif;color:rgba(255,255,255,.7)">เวลาเตรียมสอบที่มีทั้งหมด</div>
-        <div id="pl-real-hrs" style="font-size:1.3rem;font-weight:800;color:#fff">— ชั่วโมง</div>
+    <div class="pl-card">
+      <div class="pl-card-title">สรุปเวลาเตรียมสอบ</div>
+      <div class="pl-highlight" style="margin-bottom:12px">
+        <div class="pl-highlight-label">เวลาเตรียมสอบที่มีทั้งหมด</div>
+        <div class="pl-highlight-val" id="pl-real-hrs">— ชั่วโมง</div>
       </div>
-      <div style="background:#004d30;border-radius:12px;padding:14px 16px;margin-bottom:12px">
-        <div style="font-size:.78rem;color:rgba(255,255,255,.55);font-family:'Sarabun',sans-serif;margin-bottom:8px" id="pl-lesson-label">เฉลี่ยต่อบทเรียน (3 บท)</div>
-        <div id="pl-lesson-list"></div>
-      </div>
-      <div style="font-size:.78rem;color:rgba(0,0,0,.45);font-family:'Sarabun',sans-serif;margin-bottom:6px">ความคืบหน้าเวลาที่ใช้ไป</div>
-      <div class="progress-track" style="background:rgba(0,0,0,.15)"><div class="progress-fill" id="pl-progress-fill" style="width:0%"></div></div>
-      <div class="pl-progress-labels" style="color:rgba(0,0,0,.5)">
+      <div class="pl-divider"></div>
+      <div style="font-size:.78rem;color:var(--muted);font-family:'Sarabun',sans-serif;margin-bottom:10px" id="pl-lesson-label">เฉลี่ยต่อบทเรียน (3 บท)</div>
+      <div id="pl-lesson-list"></div>
+      <div class="pl-divider"></div>
+      <div style="font-size:.78rem;color:var(--muted);font-family:'Sarabun',sans-serif;margin-bottom:6px">ความคืบหน้าเวลาที่ใช้ไป</div>
+      <div class="progress-track"><div class="progress-fill" id="pl-progress-fill" style="width:0%"></div></div>
+      <div class="pl-progress-labels">
         <span id="pl-used-label">ใช้ไป 0 ชั่วโมง</span>
         <span id="pl-pct-label">0%</span>
       </div>
