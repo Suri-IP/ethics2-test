@@ -8,7 +8,7 @@
 <style>
 :root{
   --bg:#FFFFEB;--blue:#0549FE;--green:#33DF93;--yellow:rgb(237,255,40);
-  --pink:#FF53FF;--black:#1A1A1A;--gold:#E4D64D;--muted:#888;
+  --pink:#FF53FF;--orange:#FE7A05;--black:#1A1A1A;--gold:#E4D64D;--muted:#888;
   --white:#fff;--border:#E0DFDF;--shadow:0 2px 12px rgba(0,0,0,.08);
   --shadow-lg:0 8px 32px rgba(0,0,0,.18)
 }
@@ -218,6 +218,29 @@ body{background:var(--bg);font-family:'Prompt',sans-serif;color:var(--black);min
   font-size:.75rem;font-weight:700;cursor:pointer;flex-shrink:0;
 }
 .check-btn:active{transform:scale(.93)}
+.peek-btn{
+  background:var(--green);color:#fff;
+  border:none;border-radius:9px;
+  padding:0 12px;height:46px;
+  font-family:'Prompt',sans-serif;
+  font-size:.75rem;font-weight:700;cursor:pointer;flex-shrink:0;
+  display:none;
+}
+.peek-btn:active{transform:scale(.93)}
+/* Peek modal */
+.peek-sheet{background:#FFFFEB;border-radius:20px 20px 0 0;padding:18px 18px 32px;width:100%;max-width:480px;max-height:82vh;overflow-y:auto;display:flex;flex-direction:column;gap:0;box-shadow:0 -4px 30px rgba(0,0,0,.25);}
+.peek-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.peek-title{font-size:.85rem;font-weight:700;opacity:.6;letter-spacing:.5px;}
+.peek-qnum{font-size:1.5rem;font-weight:800;color:var(--green);}
+.peek-q{font-size:.9rem;line-height:1.55;margin-bottom:14px;white-space:pre-wrap;}
+.peek-choices{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.peek-choice{padding:10px 14px;border-radius:10px;font-size:.85rem;line-height:1.4;border:2px solid #ddd;background:#fff;color:var(--black);}
+.peek-choice.correct{background:rgba(51,223,147,.18);border-color:#33df93;color:#1a8a5a;font-weight:700;}
+.peek-nav-btns{display:flex;gap:8px;}
+.peek-nav-btn{flex:1;padding:11px;border-radius:10px;border:none;font-family:'Prompt',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;background:#e8e8e0;color:var(--black);}
+.peek-nav-btn:active{transform:scale(.97)}
+.peek-close{width:100%;padding:12px;border-radius:12px;border:none;font-family:'Prompt',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;background:var(--green);color:#fff;margin-top:4px;}
+.peek-close:active{transform:scale(.98)}
 
 /* Question grid modal */
 .q-grid-wrap{
@@ -341,6 +364,9 @@ body{background:var(--bg);font-family:'Prompt',sans-serif;color:var(--black);min
     <div class="quiz-nav-btns">
       <button class="btn-prev" id="btn-prev" onclick="prevQ()">← ก่อนหน้า</button>
       <button class="btn-next" id="btn-next" onclick="nextQ()">ถัดไป →</button>
+    </div>
+    <div id="peek-btn-row" style="display:none;padding:0 14px;margin-top:8px;">
+      <button class="peek-btn" id="peek-btn" onclick="openPeekModal()" style="display:block;width:100%;height:44px;border-radius:12px;font-size:.9rem;">📋 ดูเฉลยข้อนี้ก่อน</button>
     </div>
   </div>
 </div>
@@ -486,6 +512,29 @@ const SETS = [
       {q:"นางสาว A อายุ 30 ปี มีเงินเดือนสูง มีมรดก มีความมั่งคั่ง ไม่มีหนี้สิน แต่นำเงินไปฝากไว้ในบัญชีออมทรัพย์ทั้งหมด แสดงว่านางสาว A รับความเสี่ยงเป็นอย่างไร",choices:["ความสามารถรับความเสี่ยงสูง แต่การเต็มใจรับความเสี่ยงต่ำ","ความสามารถรับความเสี่ยงสูง แต่การเต็มใจรับความเสี่ยงสูง","ความสามารถรับความเสี่ยงต่ำ แต่การเต็มใจรับความเสี่ยงต่ำ","ความสามารถรับความเสี่ยงต่ำ แต่การเต็มใจรับความเสี่ยงสูง"],answer:0},
       {q:"จงเรียงลำดับผู้ลงทุนจากผู้ที่มีระดับความทนทานต่อความเสี่ยง (Risk Tolerance Level) จากมากไปน้อย\nI. นาย A จัดสรรเงินลงทุนในหุ้นของบริษัทที่กำลังเติบโต 80% พันธบัตร 10% สินทรัพย์ใกล้เคียงเงินสด 10%\nII. นาย B จัดสรรเงินลงทุนในหุ้นของบริษัทมั่นคง 85% หุ้นกู้ 10% สินทรัพย์ใกล้เคียงเงินสด 5%\nIII. นาย C จัดสรรเงินลงทุนในหุ้นของบริษัทมั่นคง 50% หุ้นกู้ 40% สินทรัพย์ใกล้เคียงเงินสด 10%",choices:["I, II, III","I, III, II","II, III, I","III, II, I"],answer:0}
     ]
+  },
+  {
+    name: "ชุดที่ 6 — แนวข้อสอบจาก IC",
+    questions: [
+      {q:"ผู้ประกอบธุรกิจไม่พิจารณาเรื่องใด ในการนำผลิตภัณฑ์มาเสนอขาย",choices:["ความสามารถในการเข้าใจผลิตภัณฑ์ การให้ข้อมูลและการให้คำแนะนำของคนขาย","ความเหมาะสมกับความเสี่ยงที่ยอมรับได้ของกลุ่มลูกค้า","ความเหมาะสมของช่องทางการขายที่มีอยู่ เช่น ผ่าน IC","อัตราผลตอบแทนสูงสุดที่ลูกค้าจะได้รับ"],answer:3},
+      {q:"ตัวเลือกใดไม่ถูกต้องเกี่ยวกับกระบวนการขาย",choices:["ผู้ประกอบธุรกิจควรแยกพื้นที่การทำธุรกรรมเงินฝากกับการขายผลิตภัณฑ์ในตลาดทุนออกจากกันอย่างเป็นสัดส่วน","ผู้แนะนำการลงทุนควรศึกษาลักษณะและความเสี่ยงของผลิตภัณฑ์ เช่น factsheet หรือ video clip เพื่อทำความเข้าใจหลังจากนำเสนอผลิตภัณฑ์ให้ลูกค้าแล้ว","ผู้แนะนำการลงทุนจัดให้ลูกค้าทำ suitability test เพื่อประเมินระดับการยอมรับความเสี่ยงของลูกค้า เพื่อใช้เป็นข้อมูลสำหรับแนะนำผลิตภัณฑ์ที่เหมาะสมกับลูกค้า","ลูกค้าที่มีระดับการศึกษาและตำแหน่งหน้าที่การงานใกล้เคียงกัน ไม่จำเป็นต้องลงทุนในผลิตภัณฑ์แบบเดียวกัน"],answer:1},
+      {q:"ตัวเลือกใดไม่ใช่คุณสมบัติของลูกค้าที่เป็นผู้ลงทุนรายย่อยที่มีความเปราะบาง",choices:["อายุ 60 ปีขึ้นไป","มีภาวะบกพร่องด้านสุขภาพ","มีรายได้ไม่เพียงพอกับรายจ่ายและมีหนี้สินมาก","ไม่มีประสบการณ์ด้านการลงทุน"],answer:2},
+      {q:"ตัวเลือกใดไม่ถูกต้องเกี่ยวกับการจัดการเรื่องร้องเรียน",choices:["หน่วยงานที่ทำหน้าที่รับเรื่องร้องเรียนต้องมีความเป็นอิสระ","ลูกค้าสามารถติดต่อกับหน่วยงานรับเรื่องร้องเรียนได้โดยตรง","แก้ไขเรื่องร้องเรียนด้วยความเป็นธรรมและแจ้งความคืบหน้าต่อผู้ร้องเรียนเมื่อแก้ไขข้อร้องเรียนเสร็จเรียบร้อยแล้ว","รายงานการดำเนินการเกี่ยวกับข้อร้องเรียนต่อคณะกรรมการและผู้บริหารระดับสูง"],answer:2},
+      {q:"ตัวเลือกใดผู้แนะนำการลงทุนสามารถกระทำได้",choices:["ใช้บัญชีซื้อขายหลักทรัพย์ของลูกค้ารายหนึ่งเพื่อลูกค้าอีกราย เฉพาะธุรกรรมที่มีเหตุจำเป็นและเป็นประโยชน์กับลูกค้า","ส่งคำสั่งซื้อขายหลักทรัพย์ให้ลูกค้ารายใหญ่ก่อนลูกค้าที่เป็นเพื่อนสนิทของตนเอง แม้เพื่อนจะส่งคำสั่งมาก่อน เพื่อความโปร่งใส","รับคำสั่งซื้อขายหลักทรัพย์จากผู้ที่ไม่ใช่เจ้าของบัญชีที่ได้รับมอบอำนาจเป็นลายลักษณ์อักษร","กระตุ้นและสนับสนุนให้ลูกค้าทำธุรกรรมบ่อยครั้ง เพื่อผลประโยชน์ของลูกค้า"],answer:2},
+      {q:"ตัวเลือกใดถูกต้องเกี่ยวกับระบบปฏิบัติการหลังการซื้อขายผลิตภัณฑ์\nI. หากลูกค้าต้องการดำเนินเกี่ยวกับทรัพย์สินตนเอง เช่น โอนหลักทรัพย์ ลูกค้าควรติดต่อกับฝ่ายปฏิบัติการโดยตรง\nII. ผู้แนะนำการลงทุนควรทำหน้าที่เป็นผู้เก็บใบแจ้งยอดทรัพย์สินของลูกค้า เนื่องจากมีการติดต่อกับลูกค้าบ่อย เพื่อความสะดวกของลูกค้า\nIII. ควรแนะนำให้ลูกค้าชำระค่าซื้อขายผ่านระบบตัดบัญชีโดยอัตโนมัติ",choices:["I และ II","I และ III","II และ III","I II และ III"],answer:1},
+      {q:"ตัวเลือกใดไม่ถูกต้องเกี่ยวกับการคัดเลือกผลิตภัณฑ์มาจำหน่ายของผู้ประกอบธุรกิจ",choices:["ผู้ประกอบธุรกิจควรพิจารณาถึงความเหมาะสมของช่องทางการขายที่มีอยู่","ผู้ประกอบธุรกิจควรพิจารณาถึงความสามารถในการให้ข้อมูลและคำแนะนำของคนขาย","ผู้ประกอบธุรกิจควรพิจารณาถึงผลตอบแทนจากการลงทุนสูงสุดของลูกค้า","ผู้ประกอบธุรกิจควรพิจารณาถึงความเหมาะสมและความเสี่ยงที่ยอมรับได้ของลูกค้า"],answer:2},
+      {q:"ตัวเลือกใดไม่ใช่การป้องกันความขัดแย้งทางผลประโยชน์",choices:["แยกหน่วยงานซื้อขายหลักทรัพย์เพื่อลูกค้ากับหน่วยงานที่ซื้อขายหลักทรัพย์เพื่อบัญชีของบริษัทออกจากกัน","ผู้บริหารหน่วยงานวาณิชธนกิจทำหน้าที่กำกับดูแลส่วนงานในการจัดทำบทวิเคราะห์","มีการห้ามทำธุรกรรมบางช่วงเวลาในกรณีบริษัทหลักทรัพย์ทำหน้าที่เป็นผู้จัดจำหน่าย","มีการเปิดเผยส่วนได้ส่วนเสียเมื่อมีการออกบทวิเคราะห์ตั้งแต่วันปิดการขายจนถึง 30 วัน กรณีบริษัทหลักทรัพย์เป็นผู้จัดจำหน่ายหลักทรัพย์"],answer:1},
+      {q:"ตัวเลือกใดไม่เป็นการใช้ประโยชน์จากข้อมูลภายใน",choices:["พนักงานฝ่ายบัญชีนำข้อมูลในงบการเงินที่ยังไม่ได้รับการตรวจจากผู้ตรวจสอบบัญชีไปบอกเพื่อนสนิทให้ลงทุนในหุ้นของบริษัทตนเอง เนื่องจากมีผลกำไรเติบโตดี","ผู้บริหารโทรสั่งขายหุ้นทันทีที่ออกจากห้องประชุมบริษัทเนื่องจากได้รับรายงานว่าบริษัทจะขาดทุนในไตรมาสนี้","ผู้ตรวจสอบบัญชีตรวจงบการเงินของบริษัทจดทะเบียนเห็นว่ามีผลขาดทุนจึงโทรสั่งขายหุ้นแต่ไม่ได้เอาข้อมูลนี้ไปบอกใคร","กรรมการบริษัทได้รับรายงานว่าบริษัทมีกำไรเติบโตได้ดีในไตรมาสนี้ จึงทำการซื้อหุ้นโดยรายงานนี้ได้ส่งให้ตลาดหลักทรัพย์เรียบร้อยแล้ว"],answer:3},
+      {q:"เหตุใดจึงต้องมีการควบคุมการซื้อขายหลักทรัพย์ของพนักงาน",choices:["ป้องกันการลักทรัพย์","ป้องกันการฟอกเงิน","ป้องกันการใช้ประโยชน์จากข้อมูลภายในและความขัดแย้งทางผลประโยชน์","ถูกทุกตัวเลือก"],answer:2},
+      {q:"ตัวเลือกใดไม่ใช่การป้องกันความขัดแย้งทางผลประโยชน์ (ข้อ 2)",choices:["15 วันทำการก่อนวันเสนอขายจนถึงวันปิดการขาย ห้ามออกบทวิเคราะห์","มีการเปิดเผยส่วนได้ส่วนเสียเมื่อมีการออกบทวิเคราะห์ตั้งแต่วันปิดการขายจนถึง 30 วัน","ผู้บริหารของหน่วยงานให้บริการลูกค้าดูแลส่วนงานในการจัดทำบทวิเคราะห์ของบริษัทเพื่อการบริหารงานอย่างมีประสิทธิภาพ","ผู้แนะนำการลงทุนเปิดเผยส่วนได้ส่วนเสียหากได้รับค่าธรรมเนียมไม่เท่ากัน"],answer:2},
+      {q:"ตัวเลือกใดไม่ใช่หน้าที่ของ compliance unit",choices:["ออกกฎระเบียบปฏิบัติต่างๆ แก่พนักงาน","ตรวจสอบการกระทำทุจริตหรือระบบการปฏิบัติงานที่หละหลวม","ลงโทษพนักงานที่ฝ่าฝืนกฎระเบียบปฏิบัติ","ประสานงานกับสำนักงาน ก.ล.ต. SET TFEX TCH อยู่เสมอ เพื่อให้รู้ทันและเข้าใจกฎเกณฑ์ใหม่ๆ"],answer:1},
+      {q:"ตัวเลือกใดไม่ใช่หน้าที่ของบริษัทหลักทรัพย์ ในการป้องกันการฟอกเงิน",choices:["ตรวจสอบเพื่อระบุตัวตนของลูกค้าและผู้รับผลประโยชน์ที่แท้จริงของลูกค้า","การรายงานธุรกรรมที่มีเหตุอันควรสงสัย","มีวิธีปฏิบัติงานที่ถูกต้องและสอดคล้องตามกฎหมายที่เกี่ยวข้องจากสำนักงาน ปปง.","ดูหลักประกันเพื่อกำหนดวงเงินให้ลูกค้า"],answer:3},
+      {q:"ตัวเลือกใดเป็นการปฏิบัติหน้าที่ด้วยความไม่ซื่อสัตย์สุจริต",choices:["แสดงเอกสารในเรื่องสำคัญไม่ตรงต่อความจริงที่มีผลกระทบต่อลูกค้า","ไม่จัดทำ KYC/CDD ให้ปรากฏผู้รับประโยชน์ที่แท้จริง","เปิดบัญชีซื้อขายโดยใช้ชื่อและลงลายมือของบุคคลอื่น","ลงนามในเอกสารเพื่อแสดงการทำหน้าที่ โดยไม่ได้ทำหน้าที่นั้นจริง"],answer:2},
+      {q:"หากลูกค้าต้องการลงทุนในกองทุนรวมที่มีความเสี่ยงสูงกว่าที่ลูกค้าจะรับได้จากการทำแบบประเมินการยอมรับความเสี่ยง ผู้แนะนำการลงทุนควรทำอย่างไร",choices:["แนะนำให้ลูกค้าทำแบบประเมินการยอมรับความเสี่ยงอีกครั้งเพื่อให้รับความเสี่ยงได้เพิ่มขึ้น","แนะนำให้ลูกค้าลงทุนได้ไม่เกิน 30% ของเงินลงทุน","ให้คำแนะนำเพิ่มเติมเกี่ยวกับผลิตภัณฑ์ให้ลูกค้าเข้าใจอย่างถ่องแท้","ปฏิเสธการให้บริการ"],answer:2},
+      {q:"หากผู้แนะนำการลงทุนต้องการแนะนำให้ลูกค้าขายหลักทรัพย์เนื่องจากเกิดสถานการณ์ไม่ดี แต่ไม่สามารถติดต่อลูกค้าได้ ผู้แนะนำการลงทุนควรทำอย่างไร",choices:["ติดต่อคนใกล้ชิดที่สนิทของลูกค้าเพื่อให้ส่งคำสั่งขายแทน","ตัดสินใจขายหลักทรัพย์ให้ลูกค้าไปก่อนเพื่อปกป้องผลประโยชน์ของลูกค้า","ติดตามสถานการณ์และแจ้งให้ลูกค้าทราบเมื่อติดต่อกับลูกค้าได้","เลือกใช้ตราสารอนุพันธ์เพื่อป้องกันความเสี่ยงให้ลูกค้า"],answer:2},
+      {q:"พฤติกรรมใดไม่เป็นการกระทำอันไม่เป็นธรรมเกี่ยวกับการซื้อขายหลักทรัพย์",choices:["นาย ก ทราบข่าวจากเพื่อนที่เป็นที่ปรึกษาทางการเงินว่าหุ้น A จะมีกำไรดีกว่าคาดจึงรีบไปแนะนำให้ลูกค้าซื้อหุ้น A","ลูกค้ารายใหญ่ของนาย ข ส่งคำสั่งขายหุ้น B เป็นจำนวนมาก นาย ข กังวลว่าเพื่อนจะเสียประโยชน์จึงรีบโทรบอกเพื่อนให้รีบขายก่อนที่นาย ข จะส่งคำสั่งขายให้ลูกค้า","ผู้บริหารให้สัมภาษณ์นักข่าวว่ายอดขายในต่างประเทศจะเติบโตได้มากกว่า 15% ทั้งที่ลูกค้าพึ่งแจ้งลดคำสั่งซื้อลง เนื่องจากยังมีสินค้าใน stock อยู่มาก","กรรมการบริษัทจดทะเบียนสั่งขายหุ้นบริษัทตัวเองจนหมด หลังทราบว่าบริษัทจะขาดทุนในปีนี้ โดยนำข้อมูลมาจากตลาดหลักทรัพย์"],answer:3},
+      {q:"ตัวเลือกใดไม่ถือเป็นการกระทำอันไม่เป็นธรรมเกี่ยวกับการซื้อขายหลักทรัพย์",choices:["ผู้บริหารให้สัมภาษณ์ว่าบริษัทจะซื้อเครื่องจักรใหม่มาใช้ในการผลิต ซึ่งจะเพิ่มประสิทธิภาพและลดต้นทุนได้มาก แต่ความจริงเป็นการปรับปรุงเครื่องจักรเดิม","ผู้บริหารทราบข้อมูลจากฝ่ายบัญชีระหว่างส่งงบการเงินให้ผู้ตรวจสอบบัญชีว่าบริษัทจะขาดทุนในไตรมาสนี้ จึงส่งคำสั่งขายหุ้นทันที","ผู้แนะนำการลงทุนส่งคำสั่งขายหลักทรัพย์ให้เพื่อนก่อนลูกค้ารายใหญ่ เนื่องจากกลัวเพื่อนจะขายไม่ทัน และการขายนั้นไม่ส่งผลกระทบกับลูกค้ารายใหญ่","ผู้แนะนำการลงทุนรับคำสั่งซื้อขายจากผู้ลงทุน โดยผู้ลงทุนได้รับข้อมูลมาจากการ chat กันในกลุ่มเพื่อนที่รู้จักกันในงานอบรม"],answer:3}
+    ]
   }
 ];
 
@@ -543,12 +592,14 @@ function renderHome(){
     const d = document.createElement('div');
     d.className = 'quiz-set-card';
     if(i === 4) d.style.background = 'var(--pink)';
+    if(i === 5) d.style.background = 'var(--green)';
     d.onclick = () => startQuiz(i);
     const badgeColor = (i === 3 || i === 4) ? 'var(--pink)' : 'rgb(237,255,40)';
+    const badgeText = 'var(--black)';
     d.innerHTML = `
       <div class="qsc-label">${set.name}</div>
       <div class="qsc-meta">${set.totalQuestions || set.questions.length} ข้อ · สลับตัวเลือกทุกรอบ</div>
-      <div class="qsc-badge" style="background:${badgeColor};color:var(--black)">เริ่มทำข้อสอบ →</div>
+      <div class="qsc-badge" style="background:${badgeColor};color:${badgeText}">เริ่มทำข้อสอบ →</div>
       <div class="qsc-arrow">›</div>`;
     list.appendChild(d);
   });
@@ -624,10 +675,45 @@ function renderGrid(){
   }
 }
 function openGridModal(){ renderGrid(); document.getElementById('grid-modal').classList.add('open'); }
+
+// ===== PEEK MODAL (set 6 answer viewer) =====
+let peekIdx = 0;
+function openPeekModal(){
+  peekIdx = curQ;
+  renderPeek();
+  document.getElementById('peek-modal').classList.add('open');
+}
+function closePeekModal(){ document.getElementById('peek-modal').classList.remove('open'); }
+function closePeekOuter(e){ if(e.target===document.getElementById('peek-modal')) closePeekModal(); }
+function peekNav(dir){
+  const qs = SETS[5].questions;
+  peekIdx = Math.max(0, Math.min(qs.length-1, peekIdx+dir));
+  renderPeek();
+}
+function renderPeek(){
+  const qs = SETS[5].questions;
+  const q = qs[peekIdx];
+  document.getElementById('peek-qnum').textContent = peekIdx+1;
+  document.getElementById('peek-qtotal').textContent = qs.length;
+  document.getElementById('peek-q-text').textContent = q.q;
+  const choicesDiv = document.getElementById('peek-choices');
+  choicesDiv.innerHTML = '';
+  q.choices.forEach((c, i) => {
+    const div = document.createElement('div');
+    div.className = 'peek-choice' + (i === q.answer ? ' correct' : '');
+    div.textContent = (i === q.answer ? '✓ ' : '') + (i+1) + '. ' + c;
+    choicesDiv.appendChild(div);
+  });
+  document.getElementById('peek-prev').style.opacity = peekIdx === 0 ? '.3' : '1';
+  document.getElementById('peek-next').style.opacity = peekIdx === qs.length-1 ? '.3' : '1';
+}
 function closeGridModal(){ document.getElementById('grid-modal').classList.remove('open'); }
 function closeGridModalOuter(e){ if(e.target===document.getElementById('grid-modal')) closeGridModal(); }
 
 function renderQuestion(){
+  // Show peek button only for set 6
+  const peekRow = document.getElementById('peek-btn-row');
+  if(peekRow) peekRow.style.display = curSet === 5 ? '' : 'none';
   const qs = getQuestions();
   const q = qs[curQ];
   const order = shuffledOrders[curQ];
@@ -1275,5 +1361,24 @@ window.addEventListener('load', function(){
   </div>
 </div>
 
+<!-- ===== PEEK MODAL (set 6 answer cheatsheet) ===== -->
+<div class="modal-overlay" id="peek-modal" onclick="closePeekOuter(event)">
+  <div class="peek-sheet">
+    <div class="modal-handle"></div>
+    <div class="peek-nav">
+      <div>
+        <div class="peek-title">ดูเฉลย — ชุดที่ 6</div>
+        <div class="peek-qnum">ข้อ <span id="peek-qnum">1</span> / <span id="peek-qtotal">16</span></div>
+      </div>
+    </div>
+    <div class="peek-q" id="peek-q-text"></div>
+    <div class="peek-choices" id="peek-choices"></div>
+    <div class="peek-nav-btns">
+      <button class="peek-nav-btn" id="peek-prev" onclick="peekNav(-1)">← ก่อนหน้า</button>
+      <button class="peek-nav-btn" id="peek-next" onclick="peekNav(1)">ถัดไป →</button>
+    </div>
+    <button class="peek-close" onclick="closePeekModal()">ปิด</button>
+  </div>
+</div>
 </body>
 </html>
